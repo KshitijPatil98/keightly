@@ -83,9 +83,13 @@ type KlarityConfigStatus struct {
 	// reconciled by this operator instance.
 	ConnectedMonitors int `json:"connectedMonitors"`
 
-	// LastHealthCheck is the RFC3339 timestamp of the most recent health probe
-	// (e.g. AI API reachability check).
+	// LastHealthCheck is the RFC3339 timestamp of the most recent successful
+	// AI API health probe.
 	LastHealthCheck string `json:"lastHealthCheck,omitempty"`
+
+	// Message contains a human-readable explanation of why active is false.
+	// Empty when active is true.
+	Message string `json:"message,omitempty"`
 }
 
 // KlarityConfig is the cluster-wide singleton configuration for the Klarity operator.
@@ -97,6 +101,8 @@ type KlarityConfigStatus struct {
 // +kubebuilder:validation:XValidation:rule="self.metadata.name == 'klarity'",message="KlarityConfig must be named 'klarity'"
 // +kubebuilder:printcolumn:name="Active",type="boolean",JSONPath=".status.active"
 // +kubebuilder:printcolumn:name="ConnectedMonitors",type="integer",JSONPath=".status.connectedMonitors"
+// +kubebuilder:printcolumn:name="LastHealthCheck",type="string",JSONPath=".status.lastHealthCheck"
+// +kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.message"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 type KlarityConfig struct {
 	metav1.TypeMeta   `json:",inline"`

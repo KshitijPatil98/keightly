@@ -107,6 +107,7 @@ func (r *KlarityConfigReconciler) Reconcile(ctx context.Context, req reconcile.R
 			"key", config.Spec.AI.APIKeySecretRef.Key,
 			"requeueAfter", requeueSecretMissing)
 		status.Active = false
+		status.Message = err.Error()
 		if updateErr := r.updateStatus(ctx, &config, status); updateErr != nil {
 			log.Error("failed to update status after secret error", "error", updateErr)
 			return reconcile.Result{}, fmt.Errorf("updating status after secret error: %w", updateErr)
@@ -124,6 +125,7 @@ func (r *KlarityConfigReconciler) Reconcile(ctx context.Context, req reconcile.R
 			"url", anthropicHealthURL,
 			"requeueAfter", requeue)
 		status.Active = false
+		status.Message = err.Error()
 		if updateErr := r.updateStatus(ctx, &config, status); updateErr != nil {
 			log.Error("failed to update status after API connectivity error", "error", updateErr)
 			return reconcile.Result{}, fmt.Errorf("updating status after API connectivity error: %w", updateErr)
@@ -133,7 +135,8 @@ func (r *KlarityConfigReconciler) Reconcile(ctx context.Context, req reconcile.R
 	log.Info("AI API connectivity verified")
 
 	status.Active = true
-	status.LastHealthCheck = time.Now().UTC().Format(time.RFC3339)
+	status.Message = ""
+	status.LastHealthCheck = time.Now().UTC().Format("2006-01-02 15:04:05 UTC")
 
 	// 4. Count enabled KlarityMonitor CRs across all namespaces.
 	count, err := r.countEnabledMonitors(ctx)

@@ -21,6 +21,12 @@ spec:
     - jsonPath: .status.connectedMonitors
       name: ConnectedMonitors
       type: integer
+    - jsonPath: .status.lastHealthCheck
+      name: LastHealthCheck
+      type: string
+    - jsonPath: .status.message
+      name: Message
+      type: string
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
@@ -132,8 +138,13 @@ spec:
                 type: integer
               lastHealthCheck:
                 description: |-
-                  LastHealthCheck is the RFC3339 timestamp of the most recent health probe
-                  (e.g. AI API reachability check).
+                  LastHealthCheck is the RFC3339 timestamp of the most recent successful
+                  AI API health probe.
+                type: string
+              message:
+                description: |-
+                  Message contains a human-readable explanation of why active is false.
+                  Empty when active is true.
                 type: string
             required:
             - active
