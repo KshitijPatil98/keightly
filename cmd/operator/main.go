@@ -9,6 +9,7 @@ import (
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	klarityiov1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
@@ -18,7 +19,8 @@ import (
 var scheme = runtime.NewScheme()
 
 func init() {
-	utilruntime.Must(klarityiov1alpha1.AddToScheme(scheme))
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))   // registers all core K8s types (Secret, Pod, etc.)
+	utilruntime.Must(klarityiov1alpha1.AddToScheme(scheme)) // registers our CRD types
 }
 
 func main() {

@@ -259,12 +259,17 @@ func (r *KlarityConfigReconciler) mapMonitorToConfig(_ context.Context, _ client
 
 // SetupWithManager registers the KlarityConfig controller with the manager and
 // configures its watches:
-//   - KlarityConfig CRs (primary resource)
+//   - KlarityConfig CRs (primary resource, spec changes only — status updates are
+//     filtered out via GenerationChangedPredicate to prevent reconcile loops)
 //   - Secrets in klarity-system (re-validate if the API key secret changes)
 //   - KlarityMonitor CRs in any namespace (recount connectedMonitors on any change)
 func (r *KlarityConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.KlarityConfig{}).
+		// GenerationChangedPredicate ensures status-only updates (e.g. our own
+		// status writes) do not re-trigger reconciliation. Only spec changes,
+		// creation, and deletion fire a reconcile via this watch. Secondary
+		// watches (Secrets, Monitors) are unaffected by this predicate.
+		For(&v1alpha1.KlarityConfig{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Watches(
 			&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(r.mapSecretToConfig),

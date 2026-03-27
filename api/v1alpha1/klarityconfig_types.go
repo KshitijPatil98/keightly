@@ -77,11 +77,11 @@ type SecretKeyRef struct {
 type KlarityConfigStatus struct {
 	// Active is true when the operator has successfully initialised and is
 	// actively watching for failure events.
-	Active bool `json:"active,omitempty"`
+	Active bool `json:"active"`
 
 	// ConnectedMonitors is the number of KlarityMonitor CRs currently being
 	// reconciled by this operator instance.
-	ConnectedMonitors int `json:"connectedMonitors,omitempty"`
+	ConnectedMonitors int `json:"connectedMonitors"`
 
 	// LastHealthCheck is the RFC3339 timestamp of the most recent health probe
 	// (e.g. AI API reachability check).
