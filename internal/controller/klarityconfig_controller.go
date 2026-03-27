@@ -109,6 +109,7 @@ func (r *KlarityConfigReconciler) Reconcile(ctx context.Context, req reconcile.R
 		status.Active = false
 		if updateErr := r.updateStatus(ctx, &config, status); updateErr != nil {
 			log.Error("failed to update status after secret error", "error", updateErr)
+			return reconcile.Result{}, fmt.Errorf("updating status after secret error: %w", updateErr)
 		}
 		return reconcile.Result{RequeueAfter: requeueSecretMissing}, nil
 	}
@@ -125,6 +126,7 @@ func (r *KlarityConfigReconciler) Reconcile(ctx context.Context, req reconcile.R
 		status.Active = false
 		if updateErr := r.updateStatus(ctx, &config, status); updateErr != nil {
 			log.Error("failed to update status after API connectivity error", "error", updateErr)
+			return reconcile.Result{}, fmt.Errorf("updating status after API connectivity error: %w", updateErr)
 		}
 		return reconcile.Result{RequeueAfter: requeue}, nil
 	}
