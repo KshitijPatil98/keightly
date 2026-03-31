@@ -62,11 +62,8 @@ func (r *KlarityMonitorReconciler) Reconcile(ctx context.Context, req reconcile.
 	}
 
 	// 3. Resolve target namespaces from spec. The CRD enforces MinItems=1 so this
-	// slice is always non-empty, but we guard defensively.
+	// slice is always non-empty.
 	targetNamespaces := monitor.Spec.TargetNamespaces
-	if len(targetNamespaces) == 0 {
-		targetNamespaces = []string{monitor.Namespace}
-	}
 	log.Info("resolved target namespaces", "namespaces", targetNamespaces)
 
 	// 4. Build the label selector once and reuse it across all namespace list calls.
