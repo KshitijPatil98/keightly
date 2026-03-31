@@ -283,6 +283,7 @@ func (r *KlarityConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Watches(
 			&v1alpha1.KlarityMonitor{},
 			handler.EnqueueRequestsFromMapFunc(r.mapMonitorToConfig),
+			builder.WithPredicates(predicate.GenerationChangedPredicate{}),
 		).
 		Complete(r)
 }

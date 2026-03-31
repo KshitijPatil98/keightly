@@ -12,7 +12,7 @@ metadata:
   namespace: payments
 spec:
   targetNamespaces:
-    - payments-staging
+    - payments
   failureTypes:
     - OOMKill
   selector:
