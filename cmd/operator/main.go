@@ -56,6 +56,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err := (&controller.KlarityMonitorReconciler{
+		Client: mgr.GetClient(),
+	}).SetupWithManager(mgr); err != nil {
+		log.Error("unable to set up KlarityMonitor controller", "error", err)
+		os.Exit(1)
+	}
+
 	log.Info("all controllers registered, starting manager")
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {

@@ -1,0 +1,22 @@
+# KlarityMonitor is namespaced: put the CR in the team's namespace (metadata.namespace).
+# CRD requires spec.targetNamespaces (≥1 non-empty string) and spec.failureTypes (≥1 non-empty string).
+# Recognised failureTypes today: "OOMKill" and "CrashLoopBackOff" (unknown values may fail at reconcile).
+# spec.selector is optional — omit it to watch all pods in targetNamespaces.
+# spec.severity: one of critical | warning | info (default warning). spec.enabled defaults to true.
+# status is written by the operator; omit when applying.
+---
+apiVersion: klarity.io/v1alpha1
+kind: KlarityMonitor
+metadata:
+  name: payments-monitor
+  namespace: payments
+spec:
+  targetNamespaces:
+    - payments-staging
+  failureTypes:
+    - OOMKill
+  selector:
+    matchLabels:
+      app: payments-api
+  severity: critical
+  enabled: true
