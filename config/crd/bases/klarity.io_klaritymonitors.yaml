@@ -138,13 +138,16 @@ spec:
               targetNamespaces:
                 description: |-
                   TargetNamespaces is the list of namespaces this Monitor watches for failures.
-                  If empty, the Monitor watches only the namespace it lives in — not the
-                  "default" namespace, but the Monitor's own namespace.
+                  At least one namespace is required. The user must explicitly specify which
+                  namespaces this Monitor watches.
                 items:
+                  minLength: 1
                   type: string
+                minItems: 1
                 type: array
             required:
             - failureTypes
+            - targetNamespaces
             type: object
           status:
             description: KlarityMonitorStatus reflects the observed state of KlarityMonitor.

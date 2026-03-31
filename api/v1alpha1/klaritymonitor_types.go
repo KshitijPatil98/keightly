@@ -7,11 +7,13 @@ import (
 // KlarityMonitorSpec defines the desired state of KlarityMonitor.
 type KlarityMonitorSpec struct {
 	// TargetNamespaces is the list of namespaces this Monitor watches for failures.
-	// If empty, the Monitor watches only the namespace it lives in — not the
-	// "default" namespace, but the Monitor's own namespace.
+	// At least one namespace is required. The user must explicitly specify which
+	// namespaces this Monitor watches.
 	//
-	// +kubebuilder:validation:Optional
-	TargetNamespaces []string `json:"targetNamespaces,omitempty"`
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinItems=1
+	// +kubebuilder:validation:items:MinLength=1
+	TargetNamespaces []string `json:"targetNamespaces"`
 
 	// FailureTypes lists the Kubernetes-level failure symptoms this Monitor detects.
 	// At least one value is required. Recognised values today are "OOMKill" and
