@@ -91,7 +91,8 @@ func TestKlarityMonitorCRDValidation(t *testing.T) {
 				Namespace: namespace.Name,
 			},
 			Spec: klarityv1alpha1.KlarityMonitorSpec{
-				FailureTypes: []string{"OOMKill"},
+				TargetNamespaces: []string{namespace.Name},
+				FailureTypes:     []string{"OOMKill"},
 			},
 		}
 
