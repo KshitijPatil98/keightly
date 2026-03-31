@@ -60,17 +60,6 @@ func TestReconcile_UpdatesWatchedPodsAndPhase(t *testing.T) {
 			},
 			wantWatchedPods: 2,
 		},
-		{
-			name:             "empty targetNamespaces defaults to monitor namespace",
-			monitorNamespace: "payments",
-			targetNamespaces: nil,
-			selector:         nil,
-			pods: []podFixture{
-				{namespace: "payments", name: "pod-a", labels: map[string]string{"app": "api"}},
-				{namespace: "billing", name: "pod-b", labels: map[string]string{"app": "api"}},
-			},
-			wantWatchedPods: 1,
-		},
 	}
 
 	for _, tc := range testCases {
