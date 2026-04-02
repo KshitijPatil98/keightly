@@ -16,14 +16,14 @@ type KeightlyMonitorSpec struct {
 	TargetNamespaces []string `json:"targetNamespaces"`
 
 	// FailureTypes lists the Kubernetes-level failure symptoms this Monitor detects.
-	// At least one value is required. Recognised values today are "OOMKill" and
+	// At least one value is required. Accepted values are "OOMKill" and
 	// "CrashLoopBackOff". These are detection triggers (observable symptoms), not
-	// root causes. Unknown values are rejected by controller logic at reconcile time,
-	// not at admission, to keep the type extensible without requiring a CRD upgrade.
+	// root causes. Invalid values are rejected at admission time by CRD schema
+	// validation.
 	//
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinItems=1
-	// +kubebuilder:validation:items:MinLength=1
+	// +kubebuilder:validation:items:Enum=OOMKill;CrashLoopBackOff
 	FailureTypes []string `json:"failureTypes"`
 
 	// Selector filters which pods this Monitor watches within the target namespaces.
