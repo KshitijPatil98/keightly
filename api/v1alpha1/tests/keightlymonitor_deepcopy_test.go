@@ -8,11 +8,11 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	klarityv1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
+	keightlyv1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
 )
 
-func TestKlarityMonitorDeepCopy(t *testing.T) {
-	original := &klarityv1alpha1.KlarityMonitor{
+func TestKeightlyMonitorDeepCopy(t *testing.T) {
+	original := &keightlyv1alpha1.KeightlyMonitor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "payments-monitor",
 			Namespace: "payments",
@@ -20,7 +20,7 @@ func TestKlarityMonitorDeepCopy(t *testing.T) {
 				"team": "payments",
 			},
 		},
-		Spec: klarityv1alpha1.KlarityMonitorSpec{
+		Spec: keightlyv1alpha1.KeightlyMonitorSpec{
 			TargetNamespaces: []string{"payments", "billing"},
 			FailureTypes:     []string{"OOMKill", "CrashLoopBackOff"},
 			Selector: &metav1.LabelSelector{
@@ -38,7 +38,7 @@ func TestKlarityMonitorDeepCopy(t *testing.T) {
 			Severity: "warning",
 			Enabled:  true,
 		},
-		Status: klarityv1alpha1.KlarityMonitorStatus{
+		Status: keightlyv1alpha1.KeightlyMonitorStatus{
 			Phase:               "Active",
 			WatchedPods:         10,
 			DiagnosesCreated:    4,

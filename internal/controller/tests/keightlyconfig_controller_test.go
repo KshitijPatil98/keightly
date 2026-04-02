@@ -24,7 +24,7 @@ func TestReconcile_ConfigDoesNotExist(t *testing.T) {
 
 func TestReconcile_SecretValidationFailures(t *testing.T) {
 	t.Run("secret does not exist", func(t *testing.T) {
-		cfg := newKlarityConfig("klarity-secrets", "anthropic-api-key")
+		cfg := newKeightlyConfig("keightly-secrets", "anthropic-api-key")
 		r := newTestReconciler(t, unexpectedHTTPClient(t), cfg)
 
 		result, err := r.Reconcile(context.Background(), configRequest())
@@ -42,8 +42,8 @@ func TestReconcile_SecretValidationFailures(t *testing.T) {
 	})
 
 	t.Run("secret key does not exist", func(t *testing.T) {
-		cfg := newKlarityConfig("klarity-secrets", "anthropic-api-key")
-		secret := newSecret("klarity-secrets", map[string][]byte{
+		cfg := newKeightlyConfig("keightly-secrets", "anthropic-api-key")
+		secret := newSecret("keightly-secrets", map[string][]byte{
 			"some-other-key": []byte("present"),
 		})
 		r := newTestReconciler(t, unexpectedHTTPClient(t), cfg, secret)
@@ -63,8 +63,8 @@ func TestReconcile_SecretValidationFailures(t *testing.T) {
 	})
 
 	t.Run("secret key value is empty", func(t *testing.T) {
-		cfg := newKlarityConfig("klarity-secrets", "anthropic-api-key")
-		secret := newSecret("klarity-secrets", map[string][]byte{
+		cfg := newKeightlyConfig("keightly-secrets", "anthropic-api-key")
+		secret := newSecret("keightly-secrets", map[string][]byte{
 			"anthropic-api-key": {},
 		})
 		r := newTestReconciler(t, unexpectedHTTPClient(t), cfg, secret)
@@ -90,8 +90,8 @@ func TestReconcile_APIInvalidReturnsRequeueFiveMinutes(t *testing.T) {
 	}))
 	defer server.Close()
 
-	cfg := newKlarityConfig("klarity-secrets", "anthropic-api-key")
-	secret := newSecret("klarity-secrets", map[string][]byte{
+	cfg := newKeightlyConfig("keightly-secrets", "anthropic-api-key")
+	secret := newSecret("keightly-secrets", map[string][]byte{
 		"anthropic-api-key": []byte("bad-key"),
 	})
 
@@ -117,8 +117,8 @@ func TestReconcile_APITimeoutReturnsRequeueOneMinute(t *testing.T) {
 	}))
 	defer server.Close()
 
-	cfg := newKlarityConfig("klarity-secrets", "anthropic-api-key")
-	secret := newSecret("klarity-secrets", map[string][]byte{
+	cfg := newKeightlyConfig("keightly-secrets", "anthropic-api-key")
+	secret := newSecret("keightly-secrets", map[string][]byte{
 		"anthropic-api-key": []byte("slow-key"),
 	})
 
@@ -158,8 +158,8 @@ func TestReconcile_HealthySetsStatusAndNoRequeue(t *testing.T) {
 	}))
 	defer server.Close()
 
-	cfg := newKlarityConfig("klarity-secrets", "anthropic-api-key")
-	secret := newSecret("klarity-secrets", map[string][]byte{
+	cfg := newKeightlyConfig("keightly-secrets", "anthropic-api-key")
+	secret := newSecret("keightly-secrets", map[string][]byte{
 		"anthropic-api-key": []byte("valid-key"),
 	})
 
@@ -268,8 +268,8 @@ func TestConnectedMonitorsCountsOnlyEnabledViaReconcile(t *testing.T) {
 			}))
 			defer server.Close()
 
-			cfg := newKlarityConfig("klarity-secrets", "anthropic-api-key")
-			secret := newSecret("klarity-secrets", map[string][]byte{
+			cfg := newKeightlyConfig("keightly-secrets", "anthropic-api-key")
+			secret := newSecret("keightly-secrets", map[string][]byte{
 				"anthropic-api-key": []byte("valid-key"),
 			})
 

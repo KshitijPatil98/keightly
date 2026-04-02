@@ -13,31 +13,31 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	klarityv1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
+	keightlyv1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
 )
 
-func newMinimalDiagnosis(namespace, name string) *klarityv1alpha1.KlarityDiagnosis {
-	return &klarityv1alpha1.KlarityDiagnosis{
+func newMinimalDiagnosis(namespace, name string) *keightlyv1alpha1.KeightlyDiagnosis {
+	return &keightlyv1alpha1.KeightlyDiagnosis{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
-		Spec: klarityv1alpha1.KlarityDiagnosisSpec{
+		Spec: keightlyv1alpha1.KeightlyDiagnosisSpec{
 			FailureType:   "CrashLoopBackOff",
 			PodName:       "app-7f6c5c8dd6-9nkt5",
 			ContainerName: "app",
 			Namespace:     namespace,
 			NodeName:      "ip-10-0-0-12",
-			OwnerRef: klarityv1alpha1.OwnerRef{
+			OwnerRef: keightlyv1alpha1.OwnerRef{
 				Kind: "Deployment",
 				Name: "app",
 			},
-			MonitorRef: klarityv1alpha1.MonitorRef{
+			MonitorRef: keightlyv1alpha1.MonitorRef{
 				Name:      "team-monitor",
 				Namespace: namespace,
 			},
 			DetectedAt: time.Now().UTC().Format(time.RFC3339),
-			Context: klarityv1alpha1.DiagnosisContext{
+			Context: keightlyv1alpha1.DiagnosisContext{
 				RestartCount: 1,
 				ExitCode:     1,
 			},
@@ -48,8 +48,8 @@ func newMinimalDiagnosis(namespace, name string) *klarityv1alpha1.KlarityDiagnos
 func newMinimalDiagnosisUnstructured(namespace, name string) *unstructured.Unstructured {
 	return &unstructured.Unstructured{
 		Object: map[string]any{
-			"apiVersion": "klarity.io/v1alpha1",
-			"kind":       "KlarityDiagnosis",
+			"apiVersion": "keightly.io/v1alpha1",
+			"kind":       "KeightlyDiagnosis",
 			"metadata": map[string]any{
 				"name":      name,
 				"namespace": namespace,
@@ -78,12 +78,12 @@ func newMinimalDiagnosisUnstructured(namespace, name string) *unstructured.Unstr
 	}
 }
 
-func createDiagnosisForStatusUpdate(t *testing.T, ctx context.Context, namespace, name string) *klarityv1alpha1.KlarityDiagnosis {
+func createDiagnosisForStatusUpdate(t *testing.T, ctx context.Context, namespace, name string) *keightlyv1alpha1.KeightlyDiagnosis {
 	t.Helper()
 
 	obj := newMinimalDiagnosis(namespace, name)
 	if err := k8sClient.Create(ctx, obj); err != nil {
-		t.Fatalf("failed creating KlarityDiagnosis for status validation: %v", err)
+		t.Fatalf("failed creating KeightlyDiagnosis for status validation: %v", err)
 	}
 	t.Cleanup(func() {
 		_ = k8sClient.Delete(context.Background(), obj)

@@ -15,7 +15,7 @@ import (
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
-	klarityv1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
+	keightlyv1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
 )
 
 var (
@@ -42,7 +42,7 @@ func TestMain(m *testing.M) {
 
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(klarityv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(keightlyv1alpha1.AddToScheme(scheme))
 
 	k8sClient, err = ctrlclient.New(cfg, ctrlclient.Options{Scheme: scheme})
 	if err != nil {

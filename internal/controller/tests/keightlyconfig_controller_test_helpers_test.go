@@ -19,17 +19,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	v1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
-	"github.com/KshitijPatil98/klarity/internal/controller"
+	v1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
+	"github.com/KshitijPatil98/keightly/internal/controller"
 )
 
 const (
-	testConfigName      = "klarity"
-	testOperatorNS      = "klarity-system"
+	testConfigName      = "keightly"
+	testOperatorNS      = "keightly-system"
 	testAnthropicHeader = "2023-06-01"
 )
 
-func newTestReconciler(t *testing.T, httpClient *http.Client, objects ...client.Object) *controller.KlarityConfigReconciler {
+func newTestReconciler(t *testing.T, httpClient *http.Client, objects ...client.Object) *controller.KeightlyConfigReconciler {
 	t.Helper()
 
 	scheme := runtime.NewScheme()
@@ -38,12 +38,12 @@ func newTestReconciler(t *testing.T, httpClient *http.Client, objects ...client.
 
 	builder := fake.NewClientBuilder().
 		WithScheme(scheme).
-		WithStatusSubresource(&v1alpha1.KlarityConfig{})
+		WithStatusSubresource(&v1alpha1.KeightlyConfig{})
 	if len(objects) > 0 {
 		builder = builder.WithObjects(objects...)
 	}
 
-	return &controller.KlarityConfigReconciler{
+	return &controller.KeightlyConfigReconciler{
 		Client:     builder.Build(),
 		HTTPClient: httpClient,
 	}
@@ -55,12 +55,12 @@ func configRequest() reconcile.Request {
 	}
 }
 
-func newKlarityConfig(secretName, secretKey string) *v1alpha1.KlarityConfig {
-	return &v1alpha1.KlarityConfig{
+func newKeightlyConfig(secretName, secretKey string) *v1alpha1.KeightlyConfig {
+	return &v1alpha1.KeightlyConfig{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: testConfigName,
 		},
-		Spec: v1alpha1.KlarityConfigSpec{
+		Spec: v1alpha1.KeightlyConfigSpec{
 			AI: v1alpha1.AIConfig{
 				Provider: "anthropic",
 				Model:    "claude-opus-4-6",
@@ -83,24 +83,24 @@ func newSecret(name string, data map[string][]byte) *corev1.Secret {
 	}
 }
 
-func newMonitor(namespace, name string, enabled bool) *v1alpha1.KlarityMonitor {
-	return &v1alpha1.KlarityMonitor{
+func newMonitor(namespace, name string, enabled bool) *v1alpha1.KeightlyMonitor {
+	return &v1alpha1.KeightlyMonitor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
-		Spec: v1alpha1.KlarityMonitorSpec{
+		Spec: v1alpha1.KeightlyMonitorSpec{
 			FailureTypes: []string{"OOMKill"},
 			Enabled:      enabled,
 		},
 	}
 }
 
-func getConfig(t *testing.T, c client.Client) v1alpha1.KlarityConfig {
+func getConfig(t *testing.T, c client.Client) v1alpha1.KeightlyConfig {
 	t.Helper()
-	var cfg v1alpha1.KlarityConfig
+	var cfg v1alpha1.KeightlyConfig
 	if err := c.Get(context.Background(), types.NamespacedName{Name: testConfigName}, &cfg); err != nil {
-		t.Fatalf("failed to get KlarityConfig: %v", err)
+		t.Fatalf("failed to get KeightlyConfig: %v", err)
 	}
 	return cfg
 }

@@ -4,12 +4,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// KlarityDiagnosisSpec captures the immutable snapshot of a detected pod failure.
+// KeightlyDiagnosisSpec captures the immutable snapshot of a detected pod failure.
 // All fields are set by the operator at creation time and never updated thereafter.
-type KlarityDiagnosisSpec struct {
+type KeightlyDiagnosisSpec struct {
 	// FailureType is the Kubernetes-level failure symptom detected, e.g. "OOMKill"
 	// or "CrashLoopBackOff". This is the authoritative source of truth; the
-	// klarity.io/failure-type label is a queryable projection of this field.
+	// keightly.io/failure-type label is a queryable projection of this field.
 	//
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
@@ -28,7 +28,7 @@ type KlarityDiagnosisSpec struct {
 	ContainerName string `json:"containerName"`
 
 	// Namespace is the namespace of the failing pod. This is also the namespace
-	// the KlarityDiagnosis CR lives in.
+	// the KeightlyDiagnosis CR lives in.
 	//
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
@@ -62,8 +62,8 @@ type KlarityDiagnosisSpec struct {
 	// +kubebuilder:validation:Optional
 	RevisionHash string `json:"revisionHash,omitempty"`
 
-	// MonitorRef is the authoritative reference to the KlarityMonitor that triggered
-	// this Diagnosis. The klarity.io/monitor and klarity.io/monitor-namespace labels
+	// MonitorRef is the authoritative reference to the KeightlyMonitor that triggered
+	// this Diagnosis. The keightly.io/monitor and keightly.io/monitor-namespace labels
 	// are queryable projections of this field.
 	//
 	// +kubebuilder:validation:Required
@@ -98,15 +98,15 @@ type OwnerRef struct {
 	Name string `json:"name"`
 }
 
-// MonitorRef identifies the KlarityMonitor that triggered a Diagnosis.
+// MonitorRef identifies the KeightlyMonitor that triggered a Diagnosis.
 type MonitorRef struct {
-	// Name is the name of the KlarityMonitor.
+	// Name is the name of the KeightlyMonitor.
 	//
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
 	Name string `json:"name"`
 
-	// Namespace is the namespace where the KlarityMonitor lives.
+	// Namespace is the namespace where the KeightlyMonitor lives.
 	//
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:MinLength=1
@@ -170,8 +170,8 @@ type ContextSource struct {
 	Data string `json:"data"`
 }
 
-// KlarityDiagnosisStatus reflects the observed state of a KlarityDiagnosis.
-type KlarityDiagnosisStatus struct {
+// KeightlyDiagnosisStatus reflects the observed state of a KeightlyDiagnosis.
+type KeightlyDiagnosisStatus struct {
 	// Phase is the current lifecycle phase of this Diagnosis.
 	//   - Pending:    detected, waiting for a processing slot (maxConcurrentDiagnoses).
 	//   - Gathering:  collectors are fetching context (logs, events, topology, metrics).
@@ -192,7 +192,7 @@ type KlarityDiagnosisStatus struct {
 	DiagnosedAt string `json:"diagnosedAt,omitempty"`
 
 	// RetryCount is the number of times this Diagnosis has been re-attempted via
-	// the klarity.io/retry annotation. Starts at 0 and is incremented each time
+	// the keightly.io/retry annotation. Starts at 0 and is incremented each time
 	// the annotation triggers a re-diagnosis.
 	RetryCount int `json:"retryCount,omitempty"`
 
@@ -279,12 +279,12 @@ type AffectedResource struct {
 	Namespace string `json:"namespace"`
 }
 
-// KlarityDiagnosis is created automatically by the Klarity operator when it detects a
-// pod failure matching a KlarityMonitor's failureTypes. It is never created manually.
+// KeightlyDiagnosis is created automatically by the Keightly operator when it detects a
+// pod failure matching a KeightlyMonitor's failureTypes. It is never created manually.
 // The spec captures the immutable failure snapshot; the status tracks lifecycle and
 // holds the AI diagnosis output.
 //
-// Re-diagnosis can be triggered by setting the klarity.io/retry annotation to "true".
+// Re-diagnosis can be triggered by setting the keightly.io/retry annotation to "true".
 // The operator resets the phase to Pending, increments retryCount, clears the previous
 // diagnosis, re-runs the full pipeline, and resets the annotation to "false" when done.
 //
@@ -296,24 +296,24 @@ type AffectedResource struct {
 // +kubebuilder:printcolumn:name="Category",type="string",JSONPath=".status.diagnosis.category"
 // +kubebuilder:printcolumn:name="Confidence",type="number",JSONPath=".status.diagnosis.confidence"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
-type KlarityDiagnosis struct {
+type KeightlyDiagnosis struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// +kubebuilder:validation:Required
-	Spec   KlarityDiagnosisSpec   `json:"spec"`
-	Status KlarityDiagnosisStatus `json:"status,omitempty"`
+	Spec   KeightlyDiagnosisSpec   `json:"spec"`
+	Status KeightlyDiagnosisStatus `json:"status,omitempty"`
 }
 
-// KlarityDiagnosisList contains a list of KlarityDiagnosis objects.
+// KeightlyDiagnosisList contains a list of KeightlyDiagnosis objects.
 //
 // +kubebuilder:object:root=true
-type KlarityDiagnosisList struct {
+type KeightlyDiagnosisList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []KlarityDiagnosis `json:"items"`
+	Items           []KeightlyDiagnosis `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&KlarityDiagnosis{}, &KlarityDiagnosisList{})
+	SchemeBuilder.Register(&KeightlyDiagnosis{}, &KeightlyDiagnosisList{})
 }

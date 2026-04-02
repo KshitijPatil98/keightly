@@ -21,7 +21,7 @@ func TestReconcile_MonitorDoesNotExist(t *testing.T) {
 }
 
 func TestReconcile_DisabledMonitorSetsPausedPhase(t *testing.T) {
-	monitor := newKlarityMonitor("team-a", testMonitorName, false, []string{"team-a"}, nil)
+	monitor := newKeightlyMonitor("team-a", testMonitorName, false, []string{"team-a"}, nil)
 	r := newTestMonitorReconciler(t, monitor)
 
 	result, err := r.Reconcile(context.Background(), monitorRequest("team-a", testMonitorName))
@@ -65,7 +65,7 @@ func TestReconcile_UpdatesWatchedPodsAndPhase(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			monitor := newKlarityMonitor(tc.monitorNamespace, testMonitorName, true, tc.targetNamespaces, labelSelector(tc.selector))
+			monitor := newKeightlyMonitor(tc.monitorNamespace, testMonitorName, true, tc.targetNamespaces, labelSelector(tc.selector))
 			objects := []client.Object{monitor}
 			for _, p := range tc.pods {
 				objects = append(objects, newPod(p.namespace, p.name, p.labels))
@@ -92,7 +92,7 @@ func TestReconcile_UpdatesWatchedPodsAndPhase(t *testing.T) {
 }
 
 func TestReconcile_InvalidSelectorReturnsError(t *testing.T) {
-	monitor := newKlarityMonitor("team-a", testMonitorName, true, []string{"team-a"}, invalidLabelSelector())
+	monitor := newKeightlyMonitor("team-a", testMonitorName, true, []string{"team-a"}, invalidLabelSelector())
 	r := newTestMonitorReconciler(t, monitor)
 
 	_, err := r.Reconcile(context.Background(), monitorRequest("team-a", testMonitorName))
@@ -105,7 +105,7 @@ func TestReconcile_InvalidSelectorReturnsError(t *testing.T) {
 }
 
 func TestReconcile_SkipsStatusWriteWhenNoStatusChange(t *testing.T) {
-	monitor := newKlarityMonitor("team-a", testMonitorName, true, []string{"team-a"}, labelSelector(map[string]string{"app": "api"}))
+	monitor := newKeightlyMonitor("team-a", testMonitorName, true, []string{"team-a"}, labelSelector(map[string]string{"app": "api"}))
 	monitor.Status.Phase = "Active"
 	monitor.Status.WatchedPods = 1
 	monitor.Status.DiagnosesCreated = 3
@@ -127,7 +127,7 @@ func TestReconcile_SkipsStatusWriteWhenNoStatusChange(t *testing.T) {
 }
 
 func TestReconcile_WritesStatusWhenWatchedPodsChanges(t *testing.T) {
-	monitor := newKlarityMonitor("team-a", testMonitorName, true, []string{"team-a"}, labelSelector(map[string]string{"app": "api"}))
+	monitor := newKeightlyMonitor("team-a", testMonitorName, true, []string{"team-a"}, labelSelector(map[string]string{"app": "api"}))
 	monitor.Status.Phase = "Active"
 	monitor.Status.WatchedPods = 0
 

@@ -4,18 +4,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// KlarityConfigSpec defines the desired state of KlarityConfig.
-type KlarityConfigSpec struct {
+// KeightlyConfigSpec defines the desired state of KeightlyConfig.
+type KeightlyConfigSpec struct {
 	// AI configures the AI provider used for all diagnoses.
 	// +kubebuilder:validation:Required
 	AI AIConfig `json:"ai"`
 
-	// DiagnosisRetention controls how long completed KlarityDiagnosis CRs are kept
+	// DiagnosisRetention controls how long completed KeightlyDiagnosis CRs are kept
 	// before the operator deletes them. Accepts standard Go duration strings (e.g. "72h").
 	// Minimum "1h".
 	//
 	// Retention cleanup rules:
-	//   - Only KlarityDiagnosis CRs in Diagnosed or Error phase are eligible for
+	//   - Only KeightlyDiagnosis CRs in Diagnosed or Error phase are eligible for
 	//     auto-deletion once they exceed this age.
 	//   - CRs in Pending, Gathering, or Diagnosing phase are NEVER auto-deleted
 	//     regardless of age, so in-flight diagnoses are never torn out from under
@@ -48,17 +48,17 @@ type AIConfig struct {
 	// +kubebuilder:validation:MinLength=1
 	Model string `json:"model"`
 
-	// APIKeySecretRef references a Secret in the klarity-system namespace that
-	// holds the AI provider API key. The Secret must exist before KlarityConfig
+	// APIKeySecretRef references a Secret in the keightly-system namespace that
+	// holds the AI provider API key. The Secret must exist before KeightlyConfig
 	// is reconciled. There is no namespace field — the secret always lives in
-	// klarity-system to keep credentials isolated from workload namespaces.
+	// keightly-system to keep credentials isolated from workload namespaces.
 	//
 	// +kubebuilder:validation:Required
 	APIKeySecretRef SecretKeyRef `json:"apiKeySecretRef"`
 }
 
 // SecretKeyRef identifies a key within a Kubernetes Secret.
-// The Secret is always resolved in the klarity-system namespace.
+// The Secret is always resolved in the keightly-system namespace.
 type SecretKeyRef struct {
 	// Name is the name of the Secret.
 	//
@@ -73,13 +73,13 @@ type SecretKeyRef struct {
 	Key string `json:"key"`
 }
 
-// KlarityConfigStatus reflects the observed state of KlarityConfig.
-type KlarityConfigStatus struct {
+// KeightlyConfigStatus reflects the observed state of KeightlyConfig.
+type KeightlyConfigStatus struct {
 	// Active is true when the operator has successfully initialised and is
 	// actively watching for failure events.
 	Active bool `json:"active"`
 
-	// ConnectedMonitors is the number of KlarityMonitor CRs currently being
+	// ConnectedMonitors is the number of KeightlyMonitor CRs currently being
 	// reconciled by this operator instance.
 	ConnectedMonitors int `json:"connectedMonitors"`
 
@@ -92,36 +92,36 @@ type KlarityConfigStatus struct {
 	Message string `json:"message,omitempty"`
 }
 
-// KlarityConfig is the cluster-wide singleton configuration for the Klarity operator.
-// Exactly one instance must exist and it must be named "klarity".
+// KeightlyConfig is the cluster-wide singleton configuration for the Keightly operator.
+// Exactly one instance must exist and it must be named "keightly".
 //
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:subresource:status
-// +kubebuilder:validation:XValidation:rule="self.metadata.name == 'klarity'",message="KlarityConfig must be named 'klarity'"
+// +kubebuilder:validation:XValidation:rule="self.metadata.name == 'keightly'",message="KeightlyConfig must be named 'keightly'"
 // +kubebuilder:printcolumn:name="Active",type="boolean",JSONPath=".status.active"
 // +kubebuilder:printcolumn:name="ConnectedMonitors",type="integer",JSONPath=".status.connectedMonitors"
 // +kubebuilder:printcolumn:name="LastHealthCheck",type="string",JSONPath=".status.lastHealthCheck"
 // +kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.message"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
-type KlarityConfig struct {
+type KeightlyConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// +kubebuilder:validation:Required
-	Spec   KlarityConfigSpec   `json:"spec"`
-	Status KlarityConfigStatus `json:"status,omitempty"`
+	Spec   KeightlyConfigSpec   `json:"spec"`
+	Status KeightlyConfigStatus `json:"status,omitempty"`
 }
 
-// KlarityConfigList contains a list of KlarityConfig objects.
+// KeightlyConfigList contains a list of KeightlyConfig objects.
 //
 // +kubebuilder:object:root=true
-type KlarityConfigList struct {
+type KeightlyConfigList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []KlarityConfig `json:"items"`
+	Items           []KeightlyConfig `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&KlarityConfig{}, &KlarityConfigList{})
+	SchemeBuilder.Register(&KeightlyConfig{}, &KeightlyConfigList{})
 }

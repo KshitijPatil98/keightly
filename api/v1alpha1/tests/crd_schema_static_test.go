@@ -10,26 +10,26 @@ import (
 	"testing"
 )
 
-func TestKlarityConfigCRDSchemaDoesNotContainGlobalCooldown(t *testing.T) {
-	crdPath := filepath.Join("..", "..", "..", "config", "crd", "bases", "klarity.io_klarityconfigs.yaml")
+func TestKeightlyConfigCRDSchemaDoesNotContainGlobalCooldown(t *testing.T) {
+	crdPath := filepath.Join("..", "..", "..", "config", "crd", "bases", "keightly.io_keightlyconfigs.yaml")
 	data, err := os.ReadFile(crdPath)
 	if err != nil {
-		t.Fatalf("failed reading KlarityConfig CRD: %v", err)
+		t.Fatalf("failed reading KeightlyConfig CRD: %v", err)
 	}
 
 	if strings.Contains(string(data), "globalCooldown") {
-		t.Fatalf("KlarityConfig CRD schema still contains removed field globalCooldown")
+		t.Fatalf("KeightlyConfig CRD schema still contains removed field globalCooldown")
 	}
 }
 
-func TestKlarityMonitorCRDSchemaDoesNotContainCooldownOverride(t *testing.T) {
-	crdPath := filepath.Join("..", "..", "..", "config", "crd", "bases", "klarity.io_klaritymonitors.yaml")
+func TestKeightlyMonitorCRDSchemaDoesNotContainCooldownOverride(t *testing.T) {
+	crdPath := filepath.Join("..", "..", "..", "config", "crd", "bases", "keightly.io_keightlymonitors.yaml")
 	data, err := os.ReadFile(crdPath)
 	if err != nil {
-		t.Fatalf("failed reading KlarityMonitor CRD: %v", err)
+		t.Fatalf("failed reading KeightlyMonitor CRD: %v", err)
 	}
 
 	if strings.Contains(string(data), "cooldownOverride") {
-		t.Fatalf("KlarityMonitor CRD schema still contains removed field cooldownOverride")
+		t.Fatalf("KeightlyMonitor CRD schema still contains removed field cooldownOverride")
 	}
 }

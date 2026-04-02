@@ -14,15 +14,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	v1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
-	"github.com/KshitijPatil98/klarity/internal/controller"
+	v1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
+	"github.com/KshitijPatil98/keightly/internal/controller"
 )
 
 const (
 	testMonitorName = "team-monitor"
 )
 
-func newTestMonitorReconciler(t *testing.T, objects ...client.Object) *controller.KlarityMonitorReconciler {
+func newTestMonitorReconciler(t *testing.T, objects ...client.Object) *controller.KeightlyMonitorReconciler {
 	t.Helper()
 
 	scheme := runtime.NewScheme()
@@ -31,17 +31,17 @@ func newTestMonitorReconciler(t *testing.T, objects ...client.Object) *controlle
 
 	builder := fake.NewClientBuilder().
 		WithScheme(scheme).
-		WithStatusSubresource(&v1alpha1.KlarityMonitor{})
+		WithStatusSubresource(&v1alpha1.KeightlyMonitor{})
 	if len(objects) > 0 {
 		builder = builder.WithObjects(objects...)
 	}
 
-	return &controller.KlarityMonitorReconciler{
+	return &controller.KeightlyMonitorReconciler{
 		Client: builder.Build(),
 	}
 }
 
-func newCountingMonitorReconciler(t *testing.T, objects ...client.Object) (*controller.KlarityMonitorReconciler, *countingStatusWriter) {
+func newCountingMonitorReconciler(t *testing.T, objects ...client.Object) (*controller.KeightlyMonitorReconciler, *countingStatusWriter) {
 	t.Helper()
 
 	scheme := runtime.NewScheme()
@@ -50,7 +50,7 @@ func newCountingMonitorReconciler(t *testing.T, objects ...client.Object) (*cont
 
 	builder := fake.NewClientBuilder().
 		WithScheme(scheme).
-		WithStatusSubresource(&v1alpha1.KlarityMonitor{})
+		WithStatusSubresource(&v1alpha1.KeightlyMonitor{})
 	if len(objects) > 0 {
 		builder = builder.WithObjects(objects...)
 	}
@@ -62,7 +62,7 @@ func newCountingMonitorReconciler(t *testing.T, objects ...client.Object) (*cont
 		statusWriter: statusWriter,
 	}
 
-	return &controller.KlarityMonitorReconciler{Client: c}, statusWriter
+	return &controller.KeightlyMonitorReconciler{Client: c}, statusWriter
 }
 
 func monitorRequest(namespace, name string) reconcile.Request {
@@ -74,18 +74,18 @@ func monitorRequest(namespace, name string) reconcile.Request {
 	}
 }
 
-func newKlarityMonitor(
+func newKeightlyMonitor(
 	namespace, name string,
 	enabled bool,
 	targetNamespaces []string,
 	selector *metav1.LabelSelector,
-) *v1alpha1.KlarityMonitor {
-	return &v1alpha1.KlarityMonitor{
+) *v1alpha1.KeightlyMonitor {
+	return &v1alpha1.KeightlyMonitor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
-		Spec: v1alpha1.KlarityMonitorSpec{
+		Spec: v1alpha1.KeightlyMonitorSpec{
 			TargetNamespaces: targetNamespaces,
 			FailureTypes:     []string{"OOMKill", "CrashLoopBackOff"},
 			Selector:         selector,
@@ -123,11 +123,11 @@ func invalidLabelSelector() *metav1.LabelSelector {
 	}
 }
 
-func getMonitor(t *testing.T, c client.Client, namespace, name string) v1alpha1.KlarityMonitor {
+func getMonitor(t *testing.T, c client.Client, namespace, name string) v1alpha1.KeightlyMonitor {
 	t.Helper()
-	var monitor v1alpha1.KlarityMonitor
+	var monitor v1alpha1.KeightlyMonitor
 	if err := c.Get(context.Background(), types.NamespacedName{Namespace: namespace, Name: name}, &monitor); err != nil {
-		t.Fatalf("failed to get KlarityMonitor %s/%s: %v", namespace, name, err)
+		t.Fatalf("failed to get KeightlyMonitor %s/%s: %v", namespace, name, err)
 	}
 	return monitor
 }

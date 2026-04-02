@@ -4,14 +4,14 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.20.1
-  name: klaritymonitors.klarity.io
+  name: keightlymonitors.keightly.io
 spec:
-  group: klarity.io
+  group: keightly.io
   names:
-    kind: KlarityMonitor
-    listKind: KlarityMonitorList
-    plural: klaritymonitors
-    singular: klaritymonitor
+    kind: KeightlyMonitor
+    listKind: KeightlyMonitorList
+    plural: keightlymonitors
+    singular: keightlymonitor
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -31,7 +31,7 @@ spec:
     schema:
       openAPIV3Schema:
         description: |-
-          KlarityMonitor configures which namespaces and pods the Klarity operator watches
+          KeightlyMonitor configures which namespaces and pods the Keightly operator watches
           for failures, and how those failures are classified and diagnosed. Each Monitor
           is namespace-scoped, allowing teams to own their own failure detection policy
           without cluster-admin access.
@@ -54,14 +54,14 @@ spec:
           metadata:
             type: object
           spec:
-            description: KlarityMonitorSpec defines the desired state of KlarityMonitor.
+            description: KeightlyMonitorSpec defines the desired state of KeightlyMonitor.
             properties:
               enabled:
                 default: true
                 description: |-
                   Enabled is a kill switch for this Monitor. When set to false, the operator
                   stops watching the target namespaces for this Monitor and its phase transitions
-                  to Paused. Existing KlarityDiagnosis CRs are not deleted. Defaults to true.
+                  to Paused. Existing KeightlyDiagnosis CRs are not deleted. Defaults to true.
                 type: boolean
               failureTypes:
                 description: |-
@@ -127,7 +127,7 @@ spec:
               severity:
                 default: warning
                 description: |-
-                  Severity tags all KlarityDiagnosis CRs created by this Monitor, allowing
+                  Severity tags all KeightlyDiagnosis CRs created by this Monitor, allowing
                   operators to route or filter diagnoses by urgency. One of "critical",
                   "warning", or "info". Defaults to "warning".
                 enum:
@@ -150,11 +150,11 @@ spec:
             - targetNamespaces
             type: object
           status:
-            description: KlarityMonitorStatus reflects the observed state of KlarityMonitor.
+            description: KeightlyMonitorStatus reflects the observed state of KeightlyMonitor.
             properties:
               diagnosesCreated:
                 description: |-
-                  DiagnosesCreated is the total number of KlarityDiagnosis CRs created by this
+                  DiagnosesCreated is the total number of KeightlyDiagnosis CRs created by this
                   Monitor since it was first applied. Monotonically increasing.
                 type: integer
               lastFailureDetected:

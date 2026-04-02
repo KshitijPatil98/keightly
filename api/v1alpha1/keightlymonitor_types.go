@@ -4,8 +4,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// KlarityMonitorSpec defines the desired state of KlarityMonitor.
-type KlarityMonitorSpec struct {
+// KeightlyMonitorSpec defines the desired state of KeightlyMonitor.
+type KeightlyMonitorSpec struct {
 	// TargetNamespaces is the list of namespaces this Monitor watches for failures.
 	// At least one namespace is required. The user must explicitly specify which
 	// namespaces this Monitor watches.
@@ -33,7 +33,7 @@ type KlarityMonitorSpec struct {
 	// +kubebuilder:validation:Optional
 	Selector *metav1.LabelSelector `json:"selector,omitempty"`
 
-	// Severity tags all KlarityDiagnosis CRs created by this Monitor, allowing
+	// Severity tags all KeightlyDiagnosis CRs created by this Monitor, allowing
 	// operators to route or filter diagnoses by urgency. One of "critical",
 	// "warning", or "info". Defaults to "warning".
 	//
@@ -43,14 +43,14 @@ type KlarityMonitorSpec struct {
 
 	// Enabled is a kill switch for this Monitor. When set to false, the operator
 	// stops watching the target namespaces for this Monitor and its phase transitions
-	// to Paused. Existing KlarityDiagnosis CRs are not deleted. Defaults to true.
+	// to Paused. Existing KeightlyDiagnosis CRs are not deleted. Defaults to true.
 	//
 	// +kubebuilder:default=true
 	Enabled bool `json:"enabled,omitempty"`
 }
 
-// KlarityMonitorStatus reflects the observed state of KlarityMonitor.
-type KlarityMonitorStatus struct {
+// KeightlyMonitorStatus reflects the observed state of KeightlyMonitor.
+type KeightlyMonitorStatus struct {
 	// Phase is the current lifecycle phase of this Monitor.
 	//   - Active:  the operator is reconciled and actively watching for failures.
 	//   - Paused:  spec.enabled is false; no failure detection is occurring.
@@ -62,7 +62,7 @@ type KlarityMonitorStatus struct {
 	// across all target namespaces. Updated each reconcile cycle.
 	WatchedPods int `json:"watchedPods,omitempty"`
 
-	// DiagnosesCreated is the total number of KlarityDiagnosis CRs created by this
+	// DiagnosesCreated is the total number of KeightlyDiagnosis CRs created by this
 	// Monitor since it was first applied. Monotonically increasing.
 	DiagnosesCreated int `json:"diagnosesCreated,omitempty"`
 
@@ -71,7 +71,7 @@ type KlarityMonitorStatus struct {
 	LastFailureDetected string `json:"lastFailureDetected,omitempty"`
 }
 
-// KlarityMonitor configures which namespaces and pods the Klarity operator watches
+// KeightlyMonitor configures which namespaces and pods the Keightly operator watches
 // for failures, and how those failures are classified and diagnosed. Each Monitor
 // is namespace-scoped, allowing teams to own their own failure detection policy
 // without cluster-admin access.
@@ -83,24 +83,24 @@ type KlarityMonitorStatus struct {
 // +kubebuilder:printcolumn:name="WatchedPods",type="integer",JSONPath=".status.watchedPods"
 // +kubebuilder:printcolumn:name="DiagnosesCreated",type="integer",JSONPath=".status.diagnosesCreated"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
-type KlarityMonitor struct {
+type KeightlyMonitor struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	// +kubebuilder:validation:Required
-	Spec   KlarityMonitorSpec   `json:"spec"`
-	Status KlarityMonitorStatus `json:"status,omitempty"`
+	Spec   KeightlyMonitorSpec   `json:"spec"`
+	Status KeightlyMonitorStatus `json:"status,omitempty"`
 }
 
-// KlarityMonitorList contains a list of KlarityMonitor objects.
+// KeightlyMonitorList contains a list of KeightlyMonitor objects.
 //
 // +kubebuilder:object:root=true
-type KlarityMonitorList struct {
+type KeightlyMonitorList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []KlarityMonitor `json:"items"`
+	Items           []KeightlyMonitor `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&KlarityMonitor{}, &KlarityMonitorList{})
+	SchemeBuilder.Register(&KeightlyMonitor{}, &KeightlyMonitorList{})
 }

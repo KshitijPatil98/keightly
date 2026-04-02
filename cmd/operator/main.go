@@ -12,15 +12,15 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	klarityiov1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
-	"github.com/KshitijPatil98/klarity/internal/controller"
+	keightlyiov1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
+	"github.com/KshitijPatil98/keightly/internal/controller"
 )
 
 var scheme = runtime.NewScheme()
 
 func init() {
-	utilruntime.Must(clientgoscheme.AddToScheme(scheme))   // registers all core K8s types (Secret, Pod, etc.)
-	utilruntime.Must(klarityiov1alpha1.AddToScheme(scheme)) // registers our CRD types
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))    // registers all core K8s types (Secret, Pod, etc.)
+	utilruntime.Must(keightlyiov1alpha1.AddToScheme(scheme)) // registers our CRD types
 }
 
 func main() {
@@ -48,18 +48,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := (&controller.KlarityConfigReconciler{
+	if err := (&controller.KeightlyConfigReconciler{
 		Client:     mgr.GetClient(),
 		HTTPClient: &http.Client{},
 	}).SetupWithManager(mgr); err != nil {
-		log.Error("unable to set up KlarityConfig controller", "error", err)
+		log.Error("unable to set up KeightlyConfig controller", "error", err)
 		os.Exit(1)
 	}
 
-	if err := (&controller.KlarityMonitorReconciler{
+	if err := (&controller.KeightlyMonitorReconciler{
 		Client: mgr.GetClient(),
 	}).SetupWithManager(mgr); err != nil {
-		log.Error("unable to set up KlarityMonitor controller", "error", err)
+		log.Error("unable to set up KeightlyMonitor controller", "error", err)
 		os.Exit(1)
 	}
 

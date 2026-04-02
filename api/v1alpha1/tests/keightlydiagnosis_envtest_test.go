@@ -13,10 +13,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	klarityv1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
+	keightlyv1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
 )
 
-func TestKlarityDiagnosisCRDValidation(t *testing.T) {
+func TestKeightlyDiagnosisCRDValidation(t *testing.T) {
 	if envtestStartErr != nil {
 		t.Skipf("skipping envtest CRD validation test: %v", envtestStartErr)
 	}
@@ -37,31 +37,31 @@ func TestKlarityDiagnosisCRDValidation(t *testing.T) {
 	})
 
 	t.Run("accepts valid diagnosis with all fields populated", func(t *testing.T) {
-		obj := &klarityv1alpha1.KlarityDiagnosis{
+		obj := &keightlyv1alpha1.KeightlyDiagnosis{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      uniqueName("full"),
 				Namespace: namespace.Name,
 			},
-			Spec: klarityv1alpha1.KlarityDiagnosisSpec{
+			Spec: keightlyv1alpha1.KeightlyDiagnosisSpec{
 				FailureType:   "OOMKill",
 				PodName:       "payments-api-6d9f7d6fb4-xkt2f",
 				ContainerName: "app",
 				Namespace:     namespace.Name,
 				NodeName:      "ip-10-0-0-15",
-				OwnerRef: klarityv1alpha1.OwnerRef{
+				OwnerRef: keightlyv1alpha1.OwnerRef{
 					Kind: "Deployment",
 					Name: "payments-api",
 				},
 				RevisionHash: "6d9f7d6fb4",
-				MonitorRef: klarityv1alpha1.MonitorRef{
+				MonitorRef: keightlyv1alpha1.MonitorRef{
 					Name:      "payments-monitor",
 					Namespace: namespace.Name,
 				},
 				DetectedAt: time.Now().UTC().Format(time.RFC3339),
-				Context: klarityv1alpha1.DiagnosisContext{
+				Context: keightlyv1alpha1.DiagnosisContext{
 					RestartCount: 4,
 					ExitCode:     137,
-					Resources: &klarityv1alpha1.ResourceValues{
+					Resources: &keightlyv1alpha1.ResourceValues{
 						Requests: map[string]string{
 							"cpu":    "250m",
 							"memory": "256Mi",
@@ -71,7 +71,7 @@ func TestKlarityDiagnosisCRDValidation(t *testing.T) {
 							"memory": "512Mi",
 						},
 					},
-					Sources: []klarityv1alpha1.ContextSource{
+					Sources: []keightlyv1alpha1.ContextSource{
 						{
 							Name: "logs",
 							Data: "out of memory",
@@ -86,7 +86,7 @@ func TestKlarityDiagnosisCRDValidation(t *testing.T) {
 		}
 
 		if err := k8sClient.Create(ctx, obj); err != nil {
-			t.Fatalf("expected valid KlarityDiagnosis, got error: %v", err)
+			t.Fatalf("expected valid KeightlyDiagnosis, got error: %v", err)
 		}
 		t.Cleanup(func() {
 			_ = k8sClient.Delete(context.Background(), obj)
@@ -96,7 +96,7 @@ func TestKlarityDiagnosisCRDValidation(t *testing.T) {
 	t.Run("accepts minimal diagnosis with only required fields", func(t *testing.T) {
 		obj := newMinimalDiagnosis(namespace.Name, uniqueName("minimal"))
 		if err := k8sClient.Create(ctx, obj); err != nil {
-			t.Fatalf("expected valid minimal KlarityDiagnosis, got error: %v", err)
+			t.Fatalf("expected valid minimal KeightlyDiagnosis, got error: %v", err)
 		}
 		t.Cleanup(func() {
 			_ = k8sClient.Delete(context.Background(), obj)
@@ -190,7 +190,7 @@ func TestKlarityDiagnosisCRDValidation(t *testing.T) {
 	})
 }
 
-func TestKlarityDiagnosisStatusValidation(t *testing.T) {
+func TestKeightlyDiagnosisStatusValidation(t *testing.T) {
 	if envtestStartErr != nil {
 		t.Skipf("skipping envtest CRD validation test: %v", envtestStartErr)
 	}
@@ -227,9 +227,9 @@ func TestKlarityDiagnosisStatusValidation(t *testing.T) {
 			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				obj := createDiagnosisForStatusUpdate(t, ctx, namespace.Name, fmt.Sprintf("category-%d-%d", i, time.Now().UnixNano()))
-				obj.Status = klarityv1alpha1.KlarityDiagnosisStatus{
+				obj.Status = keightlyv1alpha1.KeightlyDiagnosisStatus{
 					Phase: "Diagnosed",
-					Diagnosis: &klarityv1alpha1.DiagnosisResult{
+					Diagnosis: &keightlyv1alpha1.DiagnosisResult{
 						Category:   tc.category,
 						Confidence: 0.8,
 					},
@@ -263,12 +263,12 @@ func TestKlarityDiagnosisStatusValidation(t *testing.T) {
 			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				obj := createDiagnosisForStatusUpdate(t, ctx, namespace.Name, fmt.Sprintf("rectype-%d-%d", i, time.Now().UnixNano()))
-				obj.Status = klarityv1alpha1.KlarityDiagnosisStatus{
+				obj.Status = keightlyv1alpha1.KeightlyDiagnosisStatus{
 					Phase: "Diagnosed",
-					Diagnosis: &klarityv1alpha1.DiagnosisResult{
+					Diagnosis: &keightlyv1alpha1.DiagnosisResult{
 						Category:   "application",
 						Confidence: 0.8,
-						Recommendations: []klarityv1alpha1.Recommendation{
+						Recommendations: []keightlyv1alpha1.Recommendation{
 							{
 								Action:   "adjust settings",
 								Type:     tc.recType,
@@ -305,12 +305,12 @@ func TestKlarityDiagnosisStatusValidation(t *testing.T) {
 			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				obj := createDiagnosisForStatusUpdate(t, ctx, namespace.Name, fmt.Sprintf("priority-%d-%d", i, time.Now().UnixNano()))
-				obj.Status = klarityv1alpha1.KlarityDiagnosisStatus{
+				obj.Status = keightlyv1alpha1.KeightlyDiagnosisStatus{
 					Phase: "Diagnosed",
-					Diagnosis: &klarityv1alpha1.DiagnosisResult{
+					Diagnosis: &keightlyv1alpha1.DiagnosisResult{
 						Category:   "application",
 						Confidence: 0.8,
-						Recommendations: []klarityv1alpha1.Recommendation{
+						Recommendations: []keightlyv1alpha1.Recommendation{
 							{
 								Action:   "adjust settings",
 								Type:     "resource",
@@ -349,7 +349,7 @@ func TestKlarityDiagnosisStatusValidation(t *testing.T) {
 			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				obj := createDiagnosisForStatusUpdate(t, ctx, namespace.Name, fmt.Sprintf("phase-%d-%d", i, time.Now().UnixNano()))
-				obj.Status = klarityv1alpha1.KlarityDiagnosisStatus{
+				obj.Status = keightlyv1alpha1.KeightlyDiagnosisStatus{
 					Phase: tc.phase,
 				}
 
@@ -380,9 +380,9 @@ func TestKlarityDiagnosisStatusValidation(t *testing.T) {
 			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				obj := createDiagnosisForStatusUpdate(t, ctx, namespace.Name, fmt.Sprintf("confidence-%d-%d", i, time.Now().UnixNano()))
-				obj.Status = klarityv1alpha1.KlarityDiagnosisStatus{
+				obj.Status = keightlyv1alpha1.KeightlyDiagnosisStatus{
 					Phase: "Diagnosed",
-					Diagnosis: &klarityv1alpha1.DiagnosisResult{
+					Diagnosis: &keightlyv1alpha1.DiagnosisResult{
 						Category:   "application",
 						Confidence: tc.confidence,
 					},

@@ -17,18 +17,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	v1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
+	v1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
 )
 
 const (
 	// operatorNamespace is the namespace where the operator runs and where all
 	// credential Secrets are expected to live. Never configurable — keeps credential
 	// isolation simple and auditable.
-	operatorNamespace = "klarity-system"
+	operatorNamespace = "keightly-system"
 
-	// configName is the required name of the singleton KlarityConfig CR,
+	// configName is the required name of the singleton KeightlyConfig CR,
 	// enforced at the CRD level via a CEL admission rule.
-	configName = "klarity"
+	configName = "keightly"
 
 	// anthropicHealthURL is the lightweight endpoint used to verify API key
 	// validity and network reachability without triggering any billing.
@@ -55,16 +55,16 @@ const (
 	requeueAPIError = 1 * time.Minute
 )
 
-// KlarityConfigReconciler reconciles KlarityConfig CRs. It is responsible for:
+// KeightlyConfigReconciler reconciles KeightlyConfig CRs. It is responsible for:
 //   - Validating that the AI API key Secret exists and is well-formed.
 //   - Verifying live connectivity to the AI API.
-//   - Counting enabled KlarityMonitor CRs and reporting the total.
+//   - Counting enabled KeightlyMonitor CRs and reporting the total.
 //   - Keeping status.active, status.connectedMonitors, and status.lastHealthCheck
 //     up to date via the status subresource.
 //
 // The controller deliberately does no diagnosis work — it owns only the
 // configuration and health reporting lifecycle.
-type KlarityConfigReconciler struct {
+type KeightlyConfigReconciler struct {
 	client.Client
 
 	// HTTPClient is used for the AI API health probe. It must be set before
@@ -72,24 +72,24 @@ type KlarityConfigReconciler struct {
 	HTTPClient *http.Client
 }
 
-// Reconcile is the main reconciliation loop for KlarityConfig.
+// Reconcile is the main reconciliation loop for KeightlyConfig.
 //
-// It runs whenever the singleton KlarityConfig CR, a Secret in klarity-system,
-// or any KlarityMonitor CR changes. It validates the AI secret, probes the API,
+// It runs whenever the singleton KeightlyConfig CR, a Secret in keightly-system,
+// or any KeightlyMonitor CR changes. It validates the AI secret, probes the API,
 // counts enabled monitors, and writes all observations back to status.
-func (r *KlarityConfigReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
-	log := slog.Default().With("controller", "KlarityConfig", "name", req.Name)
+func (r *KeightlyConfigReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+	log := slog.Default().With("controller", "KeightlyConfig", "name", req.Name)
 	log.Info("reconcile triggered")
 
-	// 1. Fetch the singleton KlarityConfig CR.
-	var config v1alpha1.KlarityConfig
+	// 1. Fetch the singleton KeightlyConfig CR.
+	var config v1alpha1.KeightlyConfig
 	if err := r.Get(ctx, req.NamespacedName, &config); err != nil {
 		if apierrors.IsNotFound(err) {
 			// CR deleted — nothing to reconcile.
-			log.Info("KlarityConfig not found, skipping")
+			log.Info("KeightlyConfig not found, skipping")
 			return reconcile.Result{}, nil
 		}
-		return reconcile.Result{}, fmt.Errorf("fetching KlarityConfig %q: %w", req.Name, err)
+		return reconcile.Result{}, fmt.Errorf("fetching KeightlyConfig %q: %w", req.Name, err)
 	}
 
 	// Accumulate status changes on a local copy and flush at the end of each path.
@@ -138,7 +138,7 @@ func (r *KlarityConfigReconciler) Reconcile(ctx context.Context, req reconcile.R
 	status.Message = ""
 	status.LastHealthCheck = time.Now().UTC().Format(time.RFC3339)
 
-	// 4. Count enabled KlarityMonitor CRs across all namespaces.
+	// 4. Count enabled KeightlyMonitor CRs across all namespaces.
 	count, err := r.countEnabledMonitors(ctx)
 	if err != nil {
 		return reconcile.Result{}, fmt.Errorf("counting enabled monitors: %w", err)
@@ -148,10 +148,10 @@ func (r *KlarityConfigReconciler) Reconcile(ctx context.Context, req reconcile.R
 
 	// 5. Persist status.
 	if err := r.updateStatus(ctx, &config, status); err != nil {
-		return reconcile.Result{}, fmt.Errorf("updating KlarityConfig status: %w", err)
+		return reconcile.Result{}, fmt.Errorf("updating KeightlyConfig status: %w", err)
 	}
 
-	log.Info("KlarityConfig reconciled successfully",
+	log.Info("KeightlyConfig reconciled successfully",
 		"active", status.Active,
 		"connectedMonitors", status.ConnectedMonitors,
 		"lastHealthCheck", status.LastHealthCheck)
@@ -163,7 +163,7 @@ func (r *KlarityConfigReconciler) Reconcile(ctx context.Context, req reconcile.R
 
 // resolveAPIKey fetches the API key value from the Secret referenced in the spec.
 // Returns an error if the Secret is missing, the key is absent, or the value is empty.
-func (r *KlarityConfigReconciler) resolveAPIKey(ctx context.Context, ref v1alpha1.SecretKeyRef) (string, error) {
+func (r *KeightlyConfigReconciler) resolveAPIKey(ctx context.Context, ref v1alpha1.SecretKeyRef) (string, error) {
 	var secret corev1.Secret
 	secretKey := types.NamespacedName{Namespace: operatorNamespace, Name: ref.Name}
 	if err := r.Get(ctx, secretKey, &secret); err != nil {
@@ -191,7 +191,7 @@ func (r *KlarityConfigReconciler) resolveAPIKey(ctx context.Context, ref v1alpha
 //   - 401 Unauthorized → (requeueAPIKeyInvalid, error) — user must fix the key
 //   - timeout or other error → (requeueAPIError, error) — likely transient
 //   - 200 OK → (0, nil)
-func (r *KlarityConfigReconciler) verifyAPIConnectivity(ctx context.Context, apiKey string) (time.Duration, error) {
+func (r *KeightlyConfigReconciler) verifyAPIConnectivity(ctx context.Context, apiKey string) (time.Duration, error) {
 	ctx, cancel := context.WithTimeout(ctx, healthCheckTimeout)
 	defer cancel()
 
@@ -218,12 +218,12 @@ func (r *KlarityConfigReconciler) verifyAPIConnectivity(ctx context.Context, api
 	}
 }
 
-// countEnabledMonitors lists all KlarityMonitor CRs across all namespaces
+// countEnabledMonitors lists all KeightlyMonitor CRs across all namespaces
 // and returns the count of those with spec.enabled = true.
-func (r *KlarityConfigReconciler) countEnabledMonitors(ctx context.Context) (int, error) {
-	var monitors v1alpha1.KlarityMonitorList
+func (r *KeightlyConfigReconciler) countEnabledMonitors(ctx context.Context) (int, error) {
+	var monitors v1alpha1.KeightlyMonitorList
 	if err := r.List(ctx, &monitors); err != nil {
-		return 0, fmt.Errorf("listing KlarityMonitors: %w", err)
+		return 0, fmt.Errorf("listing KeightlyMonitors: %w", err)
 	}
 
 	count := 0
@@ -236,43 +236,43 @@ func (r *KlarityConfigReconciler) countEnabledMonitors(ctx context.Context) (int
 }
 
 // updateStatus writes the given status back via the status subresource client.
-func (r *KlarityConfigReconciler) updateStatus(ctx context.Context, config *v1alpha1.KlarityConfig, status v1alpha1.KlarityConfigStatus) error {
+func (r *KeightlyConfigReconciler) updateStatus(ctx context.Context, config *v1alpha1.KeightlyConfig, status v1alpha1.KeightlyConfigStatus) error {
 	config.Status = status
 	if err := r.Status().Update(ctx, config); err != nil {
-		return fmt.Errorf("updating KlarityConfig status: %w", err)
+		return fmt.Errorf("updating KeightlyConfig status: %w", err)
 	}
 	return nil
 }
 
-// mapSecretToConfig maps any Secret event in klarity-system to a reconcile
-// request for the singleton KlarityConfig CR.
-func (r *KlarityConfigReconciler) mapSecretToConfig(_ context.Context, _ client.Object) []reconcile.Request {
+// mapSecretToConfig maps any Secret event in keightly-system to a reconcile
+// request for the singleton KeightlyConfig CR.
+func (r *KeightlyConfigReconciler) mapSecretToConfig(_ context.Context, _ client.Object) []reconcile.Request {
 	return []reconcile.Request{
 		{NamespacedName: types.NamespacedName{Name: configName}},
 	}
 }
 
-// mapMonitorToConfig maps any KlarityMonitor event to a reconcile request for
-// the singleton KlarityConfig CR, so connectedMonitors stays current.
-func (r *KlarityConfigReconciler) mapMonitorToConfig(_ context.Context, _ client.Object) []reconcile.Request {
+// mapMonitorToConfig maps any KeightlyMonitor event to a reconcile request for
+// the singleton KeightlyConfig CR, so connectedMonitors stays current.
+func (r *KeightlyConfigReconciler) mapMonitorToConfig(_ context.Context, _ client.Object) []reconcile.Request {
 	return []reconcile.Request{
 		{NamespacedName: types.NamespacedName{Name: configName}},
 	}
 }
 
-// SetupWithManager registers the KlarityConfig controller with the manager and
+// SetupWithManager registers the KeightlyConfig controller with the manager and
 // configures its watches:
-//   - KlarityConfig CRs (primary resource, spec changes only — status updates are
+//   - KeightlyConfig CRs (primary resource, spec changes only — status updates are
 //     filtered out via GenerationChangedPredicate to prevent reconcile loops)
-//   - Secrets in klarity-system (re-validate if the API key secret changes)
-//   - KlarityMonitor CRs in any namespace (recount connectedMonitors on any change)
-func (r *KlarityConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
+//   - Secrets in keightly-system (re-validate if the API key secret changes)
+//   - KeightlyMonitor CRs in any namespace (recount connectedMonitors on spec changes only)
+func (r *KeightlyConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		// GenerationChangedPredicate ensures status-only updates (e.g. our own
 		// status writes) do not re-trigger reconciliation. Only spec changes,
 		// creation, and deletion fire a reconcile via this watch. Secondary
 		// watches (Secrets, Monitors) are unaffected by this predicate.
-		For(&v1alpha1.KlarityConfig{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&v1alpha1.KeightlyConfig{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Watches(
 			&corev1.Secret{},
 			handler.EnqueueRequestsFromMapFunc(r.mapSecretToConfig),
@@ -281,7 +281,7 @@ func (r *KlarityConfigReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			})),
 		).
 		Watches(
-			&v1alpha1.KlarityMonitor{},
+			&v1alpha1.KeightlyMonitor{},
 			handler.EnqueueRequestsFromMapFunc(r.mapMonitorToConfig),
 			builder.WithPredicates(predicate.GenerationChangedPredicate{}),
 		).

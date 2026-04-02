@@ -1,13 +1,13 @@
-apiVersion: klarity.io/v1alpha1
-kind: KlarityConfig
+apiVersion: keightly.io/v1alpha1
+kind: KeightlyConfig
 metadata:
-  name: klarity
+  name: keightly
 spec:
   ai:
     provider: anthropic
     model: claude-sonnet-4-20250514
     apiKeySecretRef:
-      name: klarity-ai-key
+      name: keightly-ai-key
       key: ANTHROPIC_API_KEY
   diagnosisRetention: 72h
   maxConcurrentDiagnoses: 5

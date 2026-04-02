@@ -4,14 +4,14 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.20.1
-  name: klaritydiagnoses.klarity.io
+  name: keightlydiagnoses.keightly.io
 spec:
-  group: klarity.io
+  group: keightly.io
   names:
-    kind: KlarityDiagnosis
-    listKind: KlarityDiagnosisList
-    plural: klaritydiagnoses
-    singular: klaritydiagnosis
+    kind: KeightlyDiagnosis
+    listKind: KeightlyDiagnosisList
+    plural: keightlydiagnoses
+    singular: keightlydiagnosis
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -34,12 +34,12 @@ spec:
     schema:
       openAPIV3Schema:
         description: |-
-          KlarityDiagnosis is created automatically by the Klarity operator when it detects a
-          pod failure matching a KlarityMonitor's failureTypes. It is never created manually.
+          KeightlyDiagnosis is created automatically by the Keightly operator when it detects a
+          pod failure matching a KeightlyMonitor's failureTypes. It is never created manually.
           The spec captures the immutable failure snapshot; the status tracks lifecycle and
           holds the AI diagnosis output.
 
-          Re-diagnosis can be triggered by setting the klarity.io/retry annotation to "true".
+          Re-diagnosis can be triggered by setting the keightly.io/retry annotation to "true".
           The operator resets the phase to Pending, increments retryCount, clears the previous
           diagnosis, re-runs the full pipeline, and resets the annotation to "false" when done.
         properties:
@@ -62,7 +62,7 @@ spec:
             type: object
           spec:
             description: |-
-              KlarityDiagnosisSpec captures the immutable snapshot of a detected pod failure.
+              KeightlyDiagnosisSpec captures the immutable snapshot of a detected pod failure.
               All fields are set by the operator at creation time and never updated thereafter.
             properties:
               containerName:
@@ -137,21 +137,21 @@ spec:
                 description: |-
                   FailureType is the Kubernetes-level failure symptom detected, e.g. "OOMKill"
                   or "CrashLoopBackOff". This is the authoritative source of truth; the
-                  klarity.io/failure-type label is a queryable projection of this field.
+                  keightly.io/failure-type label is a queryable projection of this field.
                 minLength: 1
                 type: string
               monitorRef:
                 description: |-
-                  MonitorRef is the authoritative reference to the KlarityMonitor that triggered
-                  this Diagnosis. The klarity.io/monitor and klarity.io/monitor-namespace labels
+                  MonitorRef is the authoritative reference to the KeightlyMonitor that triggered
+                  this Diagnosis. The keightly.io/monitor and keightly.io/monitor-namespace labels
                   are queryable projections of this field.
                 properties:
                   name:
-                    description: Name is the name of the KlarityMonitor.
+                    description: Name is the name of the KeightlyMonitor.
                     minLength: 1
                     type: string
                   namespace:
-                    description: Namespace is the namespace where the KlarityMonitor
+                    description: Namespace is the namespace where the KeightlyMonitor
                       lives.
                     minLength: 1
                     type: string
@@ -162,7 +162,7 @@ spec:
               namespace:
                 description: |-
                   Namespace is the namespace of the failing pod. This is also the namespace
-                  the KlarityDiagnosis CR lives in.
+                  the KeightlyDiagnosis CR lives in.
                 minLength: 1
                 type: string
               nodeName:
@@ -222,7 +222,8 @@ spec:
             - podName
             type: object
           status:
-            description: KlarityDiagnosisStatus reflects the observed state of a KlarityDiagnosis.
+            description: KeightlyDiagnosisStatus reflects the observed state of a
+              KeightlyDiagnosis.
             properties:
               diagnosedAt:
                 description: |-
@@ -345,7 +346,7 @@ spec:
               retryCount:
                 description: |-
                   RetryCount is the number of times this Diagnosis has been re-attempted via
-                  the klarity.io/retry annotation. Starts at 0 and is incremented each time
+                  the keightly.io/retry annotation. Starts at 0 and is incremented each time
                   the annotation triggers a re-diagnosis.
                 type: integer
             type: object

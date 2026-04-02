@@ -10,11 +10,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	klarityv1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
+	keightlyv1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
 )
 
-func TestKlarityDiagnosisDeepCopyFullyPopulated(t *testing.T) {
-	original := &klarityv1alpha1.KlarityDiagnosis{
+func TestKeightlyDiagnosisDeepCopyFullyPopulated(t *testing.T) {
+	original := &keightlyv1alpha1.KeightlyDiagnosis{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "deepcopy-test",
 			Namespace: "apps",
@@ -22,26 +22,26 @@ func TestKlarityDiagnosisDeepCopyFullyPopulated(t *testing.T) {
 				"team": "payments",
 			},
 		},
-		Spec: klarityv1alpha1.KlarityDiagnosisSpec{
+		Spec: keightlyv1alpha1.KeightlyDiagnosisSpec{
 			FailureType:   "OOMKill",
 			PodName:       "payments-5f4d8bf47d-2jp4s",
 			ContainerName: "app",
 			Namespace:     "apps",
 			NodeName:      "ip-10-0-0-30",
-			OwnerRef: klarityv1alpha1.OwnerRef{
+			OwnerRef: keightlyv1alpha1.OwnerRef{
 				Kind: "Deployment",
 				Name: "payments",
 			},
 			RevisionHash: "5f4d8bf47d",
-			MonitorRef: klarityv1alpha1.MonitorRef{
+			MonitorRef: keightlyv1alpha1.MonitorRef{
 				Name:      "payments-monitor",
 				Namespace: "apps",
 			},
 			DetectedAt: time.Now().UTC().Format(time.RFC3339),
-			Context: klarityv1alpha1.DiagnosisContext{
+			Context: keightlyv1alpha1.DiagnosisContext{
 				RestartCount: 3,
 				ExitCode:     137,
-				Resources: &klarityv1alpha1.ResourceValues{
+				Resources: &keightlyv1alpha1.ResourceValues{
 					Requests: map[string]string{
 						"cpu":    "250m",
 						"memory": "256Mi",
@@ -51,27 +51,27 @@ func TestKlarityDiagnosisDeepCopyFullyPopulated(t *testing.T) {
 						"memory": "512Mi",
 					},
 				},
-				Sources: []klarityv1alpha1.ContextSource{
+				Sources: []keightlyv1alpha1.ContextSource{
 					{Name: "logs", Data: "oom"},
 					{Name: "events", Data: "killed"},
 				},
 			},
 		},
-		Status: klarityv1alpha1.KlarityDiagnosisStatus{
+		Status: keightlyv1alpha1.KeightlyDiagnosisStatus{
 			Phase: "Diagnosed",
-			Diagnosis: &klarityv1alpha1.DiagnosisResult{
+			Diagnosis: &keightlyv1alpha1.DiagnosisResult{
 				Summary:    "container exceeded memory limit",
 				RootCause:  "memory leak in worker",
 				Category:   "application",
 				Confidence: 0.92,
-				Recommendations: []klarityv1alpha1.Recommendation{
+				Recommendations: []keightlyv1alpha1.Recommendation{
 					{
 						Action:   "increase memory limit",
 						Type:     "resource",
 						Priority: "immediate",
 					},
 				},
-				AffectedResources: []klarityv1alpha1.AffectedResource{
+				AffectedResources: []keightlyv1alpha1.AffectedResource{
 					{
 						Kind:      "Deployment",
 						Name:      "payments",
@@ -110,23 +110,23 @@ func TestKlarityDiagnosisDeepCopyFullyPopulated(t *testing.T) {
 	}
 }
 
-func TestSchemeRegistrationIncludesAllKlarityTypes(t *testing.T) {
+func TestSchemeRegistrationIncludesAllKeightlyTypes(t *testing.T) {
 	scheme := runtime.NewScheme()
-	if err := klarityv1alpha1.AddToScheme(scheme); err != nil {
+	if err := keightlyv1alpha1.AddToScheme(scheme); err != nil {
 		t.Fatalf("failed to register scheme: %v", err)
 	}
 
 	kinds := []string{
-		"KlarityConfig",
-		"KlarityConfigList",
-		"KlarityMonitor",
-		"KlarityMonitorList",
-		"KlarityDiagnosis",
-		"KlarityDiagnosisList",
+		"KeightlyConfig",
+		"KeightlyConfigList",
+		"KeightlyMonitor",
+		"KeightlyMonitorList",
+		"KeightlyDiagnosis",
+		"KeightlyDiagnosisList",
 	}
 
 	for _, kind := range kinds {
-		if _, err := scheme.New(klarityv1alpha1.GroupVersion.WithKind(kind)); err != nil {
+		if _, err := scheme.New(keightlyv1alpha1.GroupVersion.WithKind(kind)); err != nil {
 			t.Fatalf("kind %s is not registered in scheme: %v", kind, err)
 		}
 	}

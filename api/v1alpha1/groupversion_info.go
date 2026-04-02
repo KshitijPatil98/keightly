@@ -1,7 +1,7 @@
-// Package v1alpha1 contains API Schema definitions for the klarity.io v1alpha1 API group.
+// Package v1alpha1 contains API Schema definitions for the keightly.io v1alpha1 API group.
 //
 // +kubebuilder:object:generate=true
-// +groupName=klarity.io
+// +groupName=keightly.io
 package v1alpha1
 
 import (
@@ -11,7 +11,7 @@ import (
 
 var (
 	// GroupVersion is the group version used to register these objects.
-	GroupVersion = schema.GroupVersion{Group: "klarity.io", Version: "v1alpha1"}
+	GroupVersion = schema.GroupVersion{Group: "keightly.io", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add functions to this group's scheme.
 	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}

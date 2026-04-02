@@ -8,30 +8,30 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	klarityv1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
+	keightlyv1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
 )
 
-func TestKlarityConfigDeepCopy(t *testing.T) {
-	original := &klarityv1alpha1.KlarityConfig{
+func TestKeightlyConfigDeepCopy(t *testing.T) {
+	original := &keightlyv1alpha1.KeightlyConfig{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "klarity",
+			Name: "keightly",
 			Labels: map[string]string{
 				"team": "platform",
 			},
 		},
-		Spec: klarityv1alpha1.KlarityConfigSpec{
-			AI: klarityv1alpha1.AIConfig{
+		Spec: keightlyv1alpha1.KeightlyConfigSpec{
+			AI: keightlyv1alpha1.AIConfig{
 				Provider: "anthropic",
 				Model:    "claude-opus-4-6",
-				APIKeySecretRef: klarityv1alpha1.SecretKeyRef{
-					Name: "klarity-secrets",
+				APIKeySecretRef: keightlyv1alpha1.SecretKeyRef{
+					Name: "keightly-secrets",
 					Key:  "anthropic-api-key",
 				},
 			},
 			DiagnosisRetention:     "72h",
 			MaxConcurrentDiagnoses: 5,
 		},
-		Status: klarityv1alpha1.KlarityConfigStatus{
+		Status: keightlyv1alpha1.KeightlyConfigStatus{
 			Active:            true,
 			ConnectedMonitors: 2,
 			LastHealthCheck:   "2026-01-01T00:00:00Z",

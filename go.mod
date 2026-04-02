@@ -1,4 +1,4 @@
-module github.com/KshitijPatil98/klarity
+module github.com/KshitijPatil98/keightly
 
 go 1.25.0
 

@@ -7,45 +7,45 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	v1alpha1 "github.com/KshitijPatil98/klarity/api/v1alpha1"
+	v1alpha1 "github.com/KshitijPatil98/keightly/api/v1alpha1"
 )
 
-// KlarityMonitorReconciler reconciles KlarityMonitor CRs. It is responsible for:
+// KeightlyMonitorReconciler reconciles KeightlyMonitor CRs. It is responsible for:
 //   - Watching pods in the configured target namespaces.
 //   - Detecting OOMKill and CrashLoopBackOff failures.
-//   - Running existence-based deduplication before creating a KlarityDiagnosis CR.
-//   - Creating KlarityDiagnosis CRs in Pending phase for the Diagnosis controller
+//   - Running existence-based deduplication before creating a KeightlyDiagnosis CR.
+//   - Creating KeightlyDiagnosis CRs in Pending phase for the Diagnosis controller
 //     to pick up and process.
-type KlarityMonitorReconciler struct {
+type KeightlyMonitorReconciler struct {
 	client.Client
 }
 
-// Reconcile is the main reconciliation loop for KlarityMonitor.
+// Reconcile is the main reconciliation loop for KeightlyMonitor.
 //
-// It runs whenever a KlarityMonitor spec changes or a pod in a watched namespace
+// It runs whenever a KeightlyMonitor spec changes or a pod in a watched namespace
 // has its container status updated. It lists matching pods, detects failures,
-// deduplicates against existing KlarityDiagnosis CRs, and creates new ones in
+// deduplicates against existing KeightlyDiagnosis CRs, and creates new ones in
 // Pending phase for the Diagnosis controller to process.
-func (r *KlarityMonitorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
-	log := slog.Default().With("controller", "KlarityMonitor", "name", req.Name, "namespace", req.Namespace)
+func (r *KeightlyMonitorReconciler) Reconcile(ctx context.Context, req reconcile.Request) (reconcile.Result, error) {
+	log := slog.Default().With("controller", "KeightlyMonitor", "name", req.Name, "namespace", req.Namespace)
 	log.Info("reconcile triggered")
 
-	// 1. Fetch the KlarityMonitor CR.
-	var monitor v1alpha1.KlarityMonitor
+	// 1. Fetch the KeightlyMonitor CR.
+	var monitor v1alpha1.KeightlyMonitor
 	if err := r.Get(ctx, req.NamespacedName, &monitor); err != nil {
 		if apierrors.IsNotFound(err) {
-			log.Info("KlarityMonitor not found, skipping")
+			log.Info("KeightlyMonitor not found, skipping")
 			return reconcile.Result{}, nil
 		}
-		return reconcile.Result{}, fmt.Errorf("fetching KlarityMonitor %q: %w", req.NamespacedName, err)
+		return reconcile.Result{}, fmt.Errorf("fetching KeightlyMonitor %q: %w", req.NamespacedName, err)
 	}
 
 	// Accumulate status changes on a local copy and flush at the end of each path.
@@ -101,10 +101,10 @@ func (r *KlarityMonitorReconciler) Reconcile(ctx context.Context, req reconcile.
 	// 7. Persist status only if something actually changed to avoid unnecessary API
 	// writes when pods churn frequently via the pod watch added in Phase 5.
 	if err := r.updateStatus(ctx, &monitor, status); err != nil {
-		return reconcile.Result{}, fmt.Errorf("updating KlarityMonitor status: %w", err)
+		return reconcile.Result{}, fmt.Errorf("updating KeightlyMonitor status: %w", err)
 	}
 
-	log.Info("KlarityMonitor reconciled successfully",
+	log.Info("KeightlyMonitor reconciled successfully",
 		"phase", status.Phase,
 		"watchedPods", status.WatchedPods)
 
@@ -114,7 +114,7 @@ func (r *KlarityMonitorReconciler) Reconcile(ctx context.Context, req reconcile.
 // updateStatus writes the given status back via the status subresource only if
 // values have changed, avoiding spurious writes when the reconcile is triggered
 // frequently by the pod watch.
-func (r *KlarityMonitorReconciler) updateStatus(ctx context.Context, monitor *v1alpha1.KlarityMonitor, status v1alpha1.KlarityMonitorStatus) error {
+func (r *KeightlyMonitorReconciler) updateStatus(ctx context.Context, monitor *v1alpha1.KeightlyMonitor, status v1alpha1.KeightlyMonitorStatus) error {
 	if monitor.Status.Phase == status.Phase &&
 		monitor.Status.WatchedPods == status.WatchedPods &&
 		monitor.Status.DiagnosesCreated == status.DiagnosesCreated &&
@@ -123,7 +123,7 @@ func (r *KlarityMonitorReconciler) updateStatus(ctx context.Context, monitor *v1
 	}
 	monitor.Status = status
 	if err := r.Status().Update(ctx, monitor); err != nil {
-		return fmt.Errorf("updating KlarityMonitor status: %w", err)
+		return fmt.Errorf("updating KeightlyMonitor status: %w", err)
 	}
 	return nil
 }
@@ -138,9 +138,9 @@ func metav1LabelSelectorToSelector(s *metav1.LabelSelector) (labels.Selector, er
 	return selector, nil
 }
 
-// SetupWithManager registers the KlarityMonitor controller with the manager.
-func (r *KlarityMonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
+// SetupWithManager registers the KeightlyMonitor controller with the manager.
+func (r *KeightlyMonitorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v1alpha1.KlarityMonitor{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		For(&v1alpha1.KeightlyMonitor{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }

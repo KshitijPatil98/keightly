@@ -4,14 +4,14 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.20.1
-  name: klarityconfigs.klarity.io
+  name: keightlyconfigs.keightly.io
 spec:
-  group: klarity.io
+  group: keightly.io
   names:
-    kind: KlarityConfig
-    listKind: KlarityConfigList
-    plural: klarityconfigs
-    singular: klarityconfig
+    kind: KeightlyConfig
+    listKind: KeightlyConfigList
+    plural: keightlyconfigs
+    singular: keightlyconfig
   scope: Cluster
   versions:
   - additionalPrinterColumns:
@@ -34,8 +34,8 @@ spec:
     schema:
       openAPIV3Schema:
         description: |-
-          KlarityConfig is the cluster-wide singleton configuration for the Klarity operator.
-          Exactly one instance must exist and it must be named "klarity".
+          KeightlyConfig is the cluster-wide singleton configuration for the Keightly operator.
+          Exactly one instance must exist and it must be named "keightly".
         properties:
           apiVersion:
             description: |-
@@ -55,17 +55,17 @@ spec:
           metadata:
             type: object
           spec:
-            description: KlarityConfigSpec defines the desired state of KlarityConfig.
+            description: KeightlyConfigSpec defines the desired state of KeightlyConfig.
             properties:
               ai:
                 description: AI configures the AI provider used for all diagnoses.
                 properties:
                   apiKeySecretRef:
                     description: |-
-                      APIKeySecretRef references a Secret in the klarity-system namespace that
-                      holds the AI provider API key. The Secret must exist before KlarityConfig
+                      APIKeySecretRef references a Secret in the keightly-system namespace that
+                      holds the AI provider API key. The Secret must exist before KeightlyConfig
                       is reconciled. There is no namespace field — the secret always lives in
-                      klarity-system to keep credentials isolated from workload namespaces.
+                      keightly-system to keep credentials isolated from workload namespaces.
                     properties:
                       key:
                         description: Key is the key within the Secret whose value
@@ -98,12 +98,12 @@ spec:
               diagnosisRetention:
                 default: 72h
                 description: |-
-                  DiagnosisRetention controls how long completed KlarityDiagnosis CRs are kept
+                  DiagnosisRetention controls how long completed KeightlyDiagnosis CRs are kept
                   before the operator deletes them. Accepts standard Go duration strings (e.g. "72h").
                   Minimum "1h".
 
                   Retention cleanup rules:
-                    - Only KlarityDiagnosis CRs in Diagnosed or Error phase are eligible for
+                    - Only KeightlyDiagnosis CRs in Diagnosed or Error phase are eligible for
                       auto-deletion once they exceed this age.
                     - CRs in Pending, Gathering, or Diagnosing phase are NEVER auto-deleted
                       regardless of age, so in-flight diagnoses are never torn out from under
@@ -124,7 +124,7 @@ spec:
             - ai
             type: object
           status:
-            description: KlarityConfigStatus reflects the observed state of KlarityConfig.
+            description: KeightlyConfigStatus reflects the observed state of KeightlyConfig.
             properties:
               active:
                 description: |-
@@ -133,7 +133,7 @@ spec:
                 type: boolean
               connectedMonitors:
                 description: |-
-                  ConnectedMonitors is the number of KlarityMonitor CRs currently being
+                  ConnectedMonitors is the number of KeightlyMonitor CRs currently being
                   reconciled by this operator instance.
                 type: integer
               lastHealthCheck:
@@ -154,8 +154,8 @@ spec:
         - spec
         type: object
         x-kubernetes-validations:
-        - message: KlarityConfig must be named 'klarity'
-          rule: self.metadata.name == 'klarity'
+        - message: KeightlyConfig must be named 'keightly'
+          rule: self.metadata.name == 'keightly'
     served: true
     storage: true
     subresources:
