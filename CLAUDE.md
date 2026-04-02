@@ -1,27 +1,27 @@
-# Klarity — CLAUDE.md
+# Keightly — CLAUDE.md
 
-This file gives Claude Code (and human contributors) full context about the Klarity project. Read this before making any changes.
+This file gives Claude Code (and human contributors) full context about the Keightly project. Read this before making any changes.
 
 ---
 
-## What is Klarity?
+## What is Keightly?
 
-Klarity is a **Kubernetes-native Operator** that automatically detects, diagnoses, and explains Kubernetes failures using AI. It specialises deeply in two failure modes:
+Keightly (K8 + ly) is a **Kubernetes-native Operator** that automatically detects, diagnoses, and explains Kubernetes failures using AI. It specialises deeply in two failure modes:
 
 1. **OOMKill** — pods killed by the Linux kernel OOM killer due to exceeding memory limits
 2. **CrashLoopBackOff** — pods stuck in a restart loop due to application failures
 
-When a failure is detected, Klarity autonomously gathers context (pod logs, events, node state, resource metrics, topology), sends it to an AI model, and produces a structured, actionable diagnosis stored as a native Kubernetes object queryable via `kubectl`.
+When a failure is detected, Keightly autonomously gathers context (pod logs, events, node state, resource metrics, topology), sends it to an AI model, and produces a structured, actionable diagnosis stored as a native Kubernetes object queryable via `kubectl`.
 
 The longer term vision is to become the open source AI SRE for Kubernetes — autonomously diagnosing every class of cluster failure (Pending pods, node pressure, ImagePullBackOff, PVC binding failures, RBAC errors, network/DNS failures, and more). OOMKill and CrashLoopBackOff are the wedge.
 
 ---
 
-## What Makes Klarity Different
+## What Makes Keightly Different
 
-- **Kubernetes-native**: results are stored as CRDs (`KlarityDiagnosis`), queryable via `kubectl get klaritydiagnoses`
+- **Kubernetes-native**: results are stored as CRDs (`KeightlyDiagnosis`), queryable via `kubectl get keightlydiagnoses`
 - **Open source and self-hosted**: no data leaves the cluster, unlike SaaS alternatives
-- **Single binary**: one Go binary, one Docker image, one Helm chart — `helm install klarity` just works
+- **Single binary**: one Go binary, one Docker image, one Helm chart — `helm install keightly` just works
 - **Expert-level diagnosis**: prompts encode real SRE operational knowledge, not generic AI output
 - **Raw Anthropic Go SDK**: no Python, no LangChain, no unnecessary abstractions
 
@@ -29,42 +29,44 @@ The longer term vision is to become the open source AI SRE for Kubernetes — au
 
 ## Architecture
 
-Klarity is a Kubernetes Operator — a controller that encodes human SRE operational knowledge into software.
+Keightly is a Kubernetes Operator — a controller that encodes human SRE operational knowledge into software.
 
 ### Three-CRD model:
 
 ```
-KlarityConfig   (cluster-scoped singleton)
+KeightlyConfig   (cluster-scoped singleton)
   └── sets AI provider, model, API key secret ref, retention, concurrency limits
 
-KlarityMonitor  (namespace-scoped, one per team/scope)
+KeightlyMonitor  (namespace-scoped, one per team/scope)
   └── defines what to watch: target namespaces, failure types, pod selector, severity
 
-KlarityDiagnosis  (namespace-scoped, operator-created only)
+KeightlyDiagnosis  (namespace-scoped, operator-created only)
   └── one per detected failure: immutable spec snapshot + mutable status with AI output
 ```
 
 ### Data flow:
 
 ```
-User applies KlarityConfig CR (once, cluster-wide)
+User applies KeightlyConfig CR (once, cluster-wide)
     ↓
-User applies KlarityMonitor CR (per team/namespace)
+User applies KeightlyMonitor CR (per team/namespace)
     ↓
-Event watcher starts watching configured namespaces
+Monitor controller starts watching pods in configured namespaces
     ↓
 Pod OOMKills or enters CrashLoopBackOff
     ↓
-Event watcher detects K8s event (reason: OOMKilling / BackOff)
+Monitor controller detects failure via pod status:
+  - OOMKill: lastState.terminated.reason == "OOMKilled" or exitCode 137
+  - CrashLoopBackOff: state.waiting.reason == "CrashLoopBackOff"
     ↓
 Operator checks existence-based dedup:
-  - Is there already a KlarityDiagnosis for this workload + container + failureType + revisionHash?
+  - Is there already a KeightlyDiagnosis for this workload + container + failureType + revisionHash?
   - If yes → skip (same version, same failure already diagnosed)
-  - If no → create KlarityDiagnosis CR in Pending phase
+  - If no → create KeightlyDiagnosis CR in Pending phase
     ↓
-KlarityDiagnosis controller reconciles → phase transitions to Gathering
+KeightlyDiagnosis controller reconciles → phase transitions to Gathering
     ↓
-Collectors run in parallel, populating spec.context.sources:
+Collectors run, populating spec.context.sources:
   - "logs"     → previous container logs
   - "events"   → namespace events filtered by pod/node
   - "topology" → ownerRef chain, replica counts, related resources
@@ -76,7 +78,7 @@ AI returns structured diagnosis → written to status.diagnosis
     ↓
 Phase transitions to Diagnosed
     ↓
-Engineer runs: kubectl get klaritydiagnoses
+Engineer runs: kubectl get keightlydiagnoses
 ```
 
 No Redis, no Python worker, no separate processes. Controller-runtime provides the internal work queue. CRDs in etcd provide durability.
@@ -88,15 +90,15 @@ No Redis, no Python worker, no separate processes. Controller-runtime provides t
 Modelled after prometheus-operator and cert-manager. Standard Go project layout.
 
 ```
-klarity/
+keightly/
 ├── CLAUDE.md
+├── AGENTS.md                              ← instructions for Codex (review & tests)
 ├── README.md
 ├── LICENSE                                ← Apache 2.0
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── SECURITY.md
 ├── Dockerfile
-├── Taskfile.yml
 ├── go.mod
 ├── go.sum
 ├── .gitignore
@@ -107,42 +109,40 @@ klarity/
 │       └── main.go                        ← entrypoint, manager setup
 ├── api/
 │   └── v1alpha1/
-│       ├── klarityconfig_types.go         ← KlarityConfig CRD spec (cluster-scoped singleton)
-│       ├── klaritymonitor_types.go        ← KlarityMonitor CRD spec (namespace-scoped)
-│       ├── klaritydiagnosis_types.go      ← KlarityDiagnosis CRD spec (operator-created)
-│       ├── groupversion_info.go           ← registers API group klarity.io/v1alpha1
+│       ├── keightlyconfig_types.go        ← KeightlyConfig CRD spec (cluster-scoped singleton)
+│       ├── keightlymonitor_types.go       ← KeightlyMonitor CRD spec (namespace-scoped)
+│       ├── keightlydiagnosis_types.go     ← KeightlyDiagnosis CRD spec (operator-created)
+│       ├── groupversion_info.go           ← registers API group keightly.io/v1alpha1
 │       └── zz_generated.deepcopy.go      ← auto-generated, do not edit
 ├── internal/
 │   ├── controller/
-│   │   ├── klarityconfig_controller.go
-│   │   ├── klaritymonitor_controller.go
-│   │   └── klaritydiagnosis_controller.go
-│   ├── watcher/
-│   │   └── event_watcher.go              ← watches native K8s events
+│   │   ├── keightlyconfig_controller.go
+│   │   ├── keightlymonitor_controller.go
+│   │   └── keightlydiagnosis_controller.go
 │   ├── collector/
 │   │   ├── logs.go
 │   │   ├── events.go
 │   │   ├── topology.go
 │   │   └── metrics.go
 │   └── diagnosis/
-│       ├── engine.go                     ← Anthropic Go SDK agent loop
-│       ├── tools.go                      ← kubectl tool implementations
-│       └── prompts.go                    ← expert SRE system prompts
+│       ├── engine.go                      ← Anthropic Go SDK agent loop
+│       ├── tools.go                       ← kubectl tool implementations
+│       └── prompts.go                     ← expert SRE system prompts
 ├── config/
-│   ├── crd/                              ← generated, do not hand-edit
+│   ├── crd/                               ← generated, do not hand-edit
 │   └── rbac/
 ├── helm/
-│   └── klarity/
+│   └── keightly/
 │       ├── Chart.yaml
 │       ├── values.yaml
 │       └── templates/
 ├── hack/
-│   └── update-codegen.sh                 ← runs controller-gen
+│   └── update-codegen.sh                  ← runs controller-gen
 ├── test/
 │   └── e2e/
 └── examples/
-    ├── klarityconfig.yaml
-    ├── klaritymonitor.yaml
+    ├── keightlyconfig.yaml
+    ├── keightlymonitor.yaml
     └── oomkill-test.yaml
 ```
 
@@ -165,7 +165,6 @@ Key conventions:
 | AI framework | None | 5 tools + ~150 line loop = no framework needed |
 | Queue | None | CRDs in etcd + controller-runtime work queue |
 | Deduplication | Existence-based (revisionHash) | No time windows to tune; naturally handles rollouts |
-| Build tool | Taskfile | Simpler than Makefile |
 | License | Apache 2.0 | K8s ecosystem standard, CNCF compatible |
 | Deployment | Helm | Standard for K8s operators |
 
@@ -173,20 +172,20 @@ Key conventions:
 
 ## CRD Specifications
 
-### KlarityConfig — cluster-wide singleton, must be named `"klarity"`
+### KeightlyConfig — cluster-wide singleton, must be named `"keightly"`
 
 ```yaml
-apiVersion: klarity.io/v1alpha1
-kind: KlarityConfig
+apiVersion: keightly.io/v1alpha1
+kind: KeightlyConfig
 metadata:
-  name: klarity
+  name: keightly
 spec:
   ai:
     provider: anthropic
-    model: claude-opus-4-6
+    model: claude-sonnet-4-20250514
     apiKeySecretRef:
-      name: klarity-secrets
-      key: anthropic-api-key
+      name: keightly-ai-key
+      key: ANTHROPIC_API_KEY
   diagnosisRetention: "72h"
   maxConcurrentDiagnoses: 5
 status:
@@ -195,56 +194,60 @@ status:
   lastHealthCheck: "2026-03-23T10:00:00Z"
 ```
 
-### KlarityMonitor — namespace-scoped, one per team/scope
+### KeightlyMonitor — namespace-scoped, one per team/scope
 
 ```yaml
-apiVersion: klarity.io/v1alpha1
-kind: KlarityMonitor
+apiVersion: keightly.io/v1alpha1
+kind: KeightlyMonitor
 metadata:
   name: payments-monitor
   namespace: payments
 spec:
-  targetNamespaces:
+  targetNamespaces:        # required, at least one namespace
     - payments
     - payments-staging
-  failureTypes:
+  failureTypes:            # required, at least one; "OOMKill" and "CrashLoopBackOff" supported
     - OOMKill
     - CrashLoopBackOff
-  selector:
+  selector:                # optional; omit to watch all pods in target namespaces
     matchLabels:
       app: payments-api
-  severity: critical
-  enabled: true
+  severity: critical       # critical | warning | info; default "warning"
+  enabled: true            # kill switch; false pauses this monitor
 status:
-  phase: Active
+  phase: Active            # Active | Paused | Error
   watchedPods: 12
   diagnosesCreated: 4
   lastFailureDetected: "2026-03-23T09:45:00Z"
 ```
 
-### KlarityDiagnosis — auto-created by Operator, never manually
+### KeightlyDiagnosis — auto-created by Operator, never manually
+
+Lives in the target namespace where the failing pod lives, NOT the Monitor's namespace. Labels link back to the Monitor (ownerReferences don't work cross-namespace).
 
 ```yaml
-apiVersion: klarity.io/v1alpha1
-kind: KlarityDiagnosis
+apiVersion: keightly.io/v1alpha1
+kind: KeightlyDiagnosis
 metadata:
   name: oomkill-payments-api-7b4f9-1711188000
   namespace: payments
   labels:
-    klarity.io/monitor: payments-monitor
-    klarity.io/failure-type: OOMKill
-    klarity.io/owner-kind: Deployment
-    klarity.io/owner-name: payments-api
-    klarity.io/container: api
-    klarity.io/revision-hash: 7b4f9c8d6
+    keightly.io/monitor: payments-monitor
+    keightly.io/monitor-namespace: payments
+    keightly.io/failure-type: OOMKill
+    keightly.io/severity: critical
+    keightly.io/owner-kind: Deployment
+    keightly.io/owner-name: payments-api
+    keightly.io/container: api
+    keightly.io/revision-hash: 7b4f9c8d6
   annotations:
-    klarity.io/retry: "false"
+    keightly.io/retry: "false"
 spec:
   failureType: OOMKill
   podName: payments-api-7b4f9c8d6-xkp2m
   containerName: api
   namespace: payments
-  nodeName: k3d-klarity-agent-0
+  nodeName: k3d-keightly-agent-0
   ownerRef:
     kind: Deployment
     name: payments-api
@@ -272,6 +275,7 @@ status:
   phase: Diagnosed          # Pending | Gathering | Diagnosing | Diagnosed | Error
   diagnosedAt: "2026-03-23T09:45:47Z"
   retryCount: 0
+  lastError: ""
   diagnosis:
     summary: "OOMKill due to memory leak in database connection pool"
     rootCause: "Memory grew linearly from 180Mi to 512Mi over 4 hours..."
@@ -279,8 +283,8 @@ status:
     confidence: 0.92
     recommendations:
       - action: "Increase memory limit to 768Mi"
-        type: resource
-        priority: immediate
+        type: resource      # resource | code | infrastructure | configuration
+        priority: immediate # immediate | short-term | long-term
       - action: "Cap connection pool at 25 connections"
         type: code
         priority: short-term
@@ -301,18 +305,21 @@ status:
 - apiGroups: [""]
   resources: ["pods/log"]
   verbs: ["get"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
 - apiGroups: ["metrics.k8s.io"]
   resources: ["pods", "nodes"]
   verbs: ["get", "list"]
-- apiGroups: ["klarity.io"]
-  resources: ["klarityconfigs", "klaritymonitors", "klaritydiagnoses"]
-  verbs: ["get", "list", "watch", "create", "update", "patch"]
-- apiGroups: ["klarity.io"]
-  resources: ["klaritydiagnoses/status"]
+- apiGroups: ["keightly.io"]
+  resources: ["keightlyconfigs", "keightlymonitors", "keightlydiagnoses"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["keightly.io"]
+  resources: ["keightlyconfigs/status", "keightlymonitors/status", "keightlydiagnoses/status"]
   verbs: ["get", "update", "patch"]
 ```
 
-No write access to core K8s resources. Klarity is read-only on the cluster. Diagnosis only, no auto-remediation in v1.
+No write access to core K8s resources. Keightly is read-only on the cluster. Diagnosis only, no auto-remediation in v1.
 
 ---
 
@@ -325,27 +332,8 @@ No write access to core K8s resources. Klarity is read-only on the cluster. Diag
 - No global state — everything injected via struct fields
 - Interfaces for testability — `DiagnosisEngine`, `Collector`, `KubectlRunner` are interfaces
 - Table-driven tests
-
----
-
-## What to Build Next (in order)
-
-1. `cmd/operator/main.go` — manager setup with controller-runtime, register all three CRDs
-2. `internal/controller/klarityconfig_controller.go` — validate config, initialise AI client
-3. `internal/controller/klaritymonitor_controller.go` — configure event watcher per monitor
-4. `internal/watcher/event_watcher.go` — native K8s event watcher (OOMKilling / BackOff reasons)
-5. `internal/collector/logs.go` — previous container log collector
-6. `internal/collector/events.go` — K8s events collector
-7. `internal/collector/topology.go` — ownerRef chain + replica state collector
-8. `internal/collector/metrics.go` — metrics-server resource usage collector
-9. `internal/diagnosis/prompts.go` — expert SRE system prompts
-10. `internal/diagnosis/tools.go` — kubectl tool implementations
-11. `internal/diagnosis/engine.go` — Claude agent loop
-12. `internal/controller/klaritydiagnosis_controller.go` — drives full diagnosis lifecycle
-13. `config/rbac/` — RBAC manifests
-14. `helm/klarity/` — Helm chart
-15. `examples/` — sample YAMLs
-16. End to end test with real OOMKill on k3d
+- Constants for namespace (`keightly-system`) — no magic strings
+- Status comparison before write — avoid infinite reconcile loops
 
 ---
 
