@@ -84,6 +84,31 @@ func TestKeightlyMonitorCRDValidation(t *testing.T) {
 		}
 	})
 
+	t.Run("rejects unsupported failure type item", func(t *testing.T) {
+		obj := &keightlyv1alpha1.KeightlyMonitor{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "unsupported-failure-type",
+				Namespace: namespace.Name,
+			},
+			Spec: keightlyv1alpha1.KeightlyMonitorSpec{
+				TargetNamespaces: []string{namespace.Name},
+				FailureTypes:     []string{"ImagePullBackOff"},
+			},
+		}
+
+		err := k8sClient.Create(ctx, obj)
+		if err == nil {
+			_ = k8sClient.Delete(context.Background(), obj)
+			t.Fatalf("expected validation error for unsupported failure type, got nil")
+		}
+		if !apierrors.IsInvalid(err) {
+			t.Fatalf("expected invalid error, got: %v", err)
+		}
+		if !strings.Contains(err.Error(), "failureTypes") {
+			t.Fatalf("expected failureTypes validation error, got: %v", err)
+		}
+	})
+
 	t.Run("accepts valid monitor", func(t *testing.T) {
 		obj := &keightlyv1alpha1.KeightlyMonitor{
 			ObjectMeta: metav1.ObjectMeta{
